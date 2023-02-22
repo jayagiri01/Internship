@@ -1,0 +1,1860 @@
+1.Write a python program to scrape data for “Data Analyst” Job position in “Bangalore” location. You have to scrape the job-title, job-location, company_name, experience_required. You have to scrape first 10 jobs data.
+
+This task will be done in following steps:
+
+First get the webpage https://www.naukri.com/
+Enter “Data Analyst” in “Skill, Designations, Companies” field and enter “Bangalore” in “enter the location” field.
+Then click the search button.
+Then scrape the data for the first 10 jobs results you get.
+Finally create a dataframe of the scraped data.
+# Let's now import all the required libraries.
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+# let's first connect to the web driver
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.close()
+driver.get('https://www.naukri.com/')
+# Finding element for job search bar
+search_field_designation=driver.find_element_by_class_name("suggestor-input") #job search bar
+search_field_designation.send_keys("Data Analyst")
+search_field_loaction=driver.find_element_by_xpath('/html/body/div/div[2]/div[3]/div/div/div[3]/div/div/div/input') #Location Search bar
+search_field_loaction.send_keys("Bangalore")
+search_button=driver.find_element_by_xpath("/html/body/div/div[2]/div[3]/div/div/div[6]")
+search_button.click()
+# Specifying the url of the webpage to be scraped
+url="https://www.naukri.com/data-analyst-jobs-in-bangalore?k=data%20analyst&l=bangalore"
+# Lets open the webpage through our web driver
+driver.get(url)
+job_titles=[]
+company_names=[]
+locations_list=[]
+experience_list=[]
+titles_tags=driver.find_elements_by_xpath("//a[@class='title fw500 ellipsis']")
+titles_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="9da1cf4b-110d-45e9-aad4-d52c791c843d")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="2375dd39-b715-4135-a2e1-e62c7c54de58")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="1f6c783e-8a65-4f9c-873e-d927fa6285a2")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="1d910651-f921-4827-8f63-1ee229af009c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="18d14349-42ae-4c93-abe3-b8d89217c955")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="694f82e9-f03a-4abc-a302-1b8852a2bda5")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="3fd9c2a9-76f5-4087-98a8-bf69b078a692")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="969521c7-d2fb-4d4a-b9f0-236017fa83bd")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="a98bfc68-6e76-46e5-88af-96de66db0916")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="91ead570-39c0-4a04-b20d-a37cc3b20d4e")>]
+Now we have all the tags in which there are the job titles.
+
+Now we will extract the text from these tags one by one by looping over these tags
+
+# Now the text of the title is inside the tags extracted above.
+
+# so we will run a loop to iterate over the tags extracted above and
+
+for i in titles_tags:
+    title=i.text
+    job_titles.append(title)
+job_titles[0:10]
+['Senior Data Analyst/ Business Analyst',
+ 'Sr Domain Expert -Data Analysts',
+ 'Data Analyst',
+ 'Senior Data Analyst',
+ 'Senior Data Analyst',
+ 'Senior Data Analyst (Digital Services Analytics)',
+ 'Senior Data Analyst',
+ 'Data Analyst',
+ 'Senior Data analyst (Azure / MDM)',
+ 'Senior Professional Data Analyst']
+# So lets extract all the tags having the company names
+companies_tags=driver.find_elements_by_xpath("//a[@class='subTitle ellipsis fleft']")
+companies_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="905ace6b-1958-4ad1-a44e-647fa79d53a3")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="c32b57ad-7b15-417c-a0eb-4525b599811f")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="eb5f497b-0750-4a8e-b0a1-8282f369f77f")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="f51b38e0-790b-4b82-a03f-fcca43b05015")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="57ff048f-32ba-4b04-bc49-8ced64c4b181")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="47e64b3b-538a-4d66-88ea-1ff982ffcfbb")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="82374436-4da8-4f4f-9e18-7a3dc2869db8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="6ae99a88-56b2-4653-8f19-3672f1fe20f0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="d47fdae1-048d-416c-a8a9-d75c79534690")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="5b877ce3-c260-4153-9268-daef311ae5d3")>]
+for i in companies_tags:
+    company_name=i.text
+    company_names.append(company_name)
+company_names[0:10]
+['Rupeek',
+ 'Siemens',
+ 'Enrich talents',
+ 'LatentView',
+ 'FINNOVATION TECH SOLUTIONS PRIVATE LIMITED',
+ 'Dell Technologies',
+ 'Cerner',
+ 'Myntra',
+ 'Syneos Health',
+ 'DXC Technology']
+# so lets extract all the tags having the experience required data
+
+experience_tags=driver.find_elements_by_xpath("//li[@class='fleft grey-text br2 placeHolderLi experience']/span[1]")
+experience_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="197f6360-0170-40d1-be98-00959c5b234d")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="035c0b26-a585-4023-a200-39b3a26bb218")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="310d9e86-0fb2-41c1-b3aa-78dd0d144f6a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="81792673-a1bb-4fa2-8404-0a6bbb1eeafe")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="e91b8441-5946-4ce1-b68c-719d186e8b8a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="cdd5ee75-7fb2-4ab4-a2ac-fec63521ed87")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="d9eda594-2f0b-495d-8357-eea17c4c4fc3")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="e2e96068-e39c-47bd-a40b-b76cf923b399")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="92637e03-d488-4b76-af04-969e3733871d")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="7130a83a-a276-43b0-8ad7-ccd38ab3afe3")>]
+for i in experience_tags:
+    experience=i.text
+    experience_list.append(experience)
+experience_list[0:10]
+['2-7 Yrs',
+ '0-10 Yrs',
+ '0-4 Yrs',
+ '2-6 Yrs',
+ '3-6 Yrs',
+ '1-6 Yrs',
+ '8-12 Yrs',
+ '1-3 Yrs',
+ '4-7 Yrs',
+ '3-7 Yrs']
+# so lets extract all the tags having the location required data
+
+location_tags=driver.find_elements_by_xpath("//li[@class='fleft grey-text br2 placeHolderLi location']/span[1]")
+location_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="d070952b-be74-4fc5-84ba-5c511a1c7c27")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="eb903a1a-c905-49b7-8766-4d87253accc6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="de3b03a7-d34e-4d2c-bdc0-294bdde4ef0c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="04143593-c970-47de-9ed5-5965fa890345")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="60c644d5-f9fd-4123-ae36-4ae1ec25764c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="48022219-62ff-48aa-91ee-e4bac5e64f0b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="bd3a6d64-24df-4091-b227-0fdb91533004")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="19752dbc-c9f5-44fa-8a8b-5f5cb2b32aa6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="98cec3b9-9cba-49c0-bba9-01163b489f28")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="8d8f7fe155722c1d5390ee3ff1bb1c9e", element="deffb5eb-d7b9-4343-bfbc-849b8d8329d9")>]
+for i in location_tags :
+    location=i.text
+    locations_list.append(location)
+locations_list[0:10]
+['Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Chennai, Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru(Old Madras Road)',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Hyderabad/Secunderabad, Gurgaon/Gurugram, Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru']
+#So lets check th length of ech element.
+#Import pandas as pd
+jobs=pd.DataFrame({})
+jobs['title']=job_titles[:10]
+jobs['company']=company_names[:10]
+jobs['experience_required']=experience_list[:10]
+jobs['location']=locations_list[:10]
+jobs
+title	company	experience_required	location
+0	Senior Data Analyst/ Business Analyst	Rupeek	2-7 Yrs	Bangalore/Bengaluru
+1	Sr Domain Expert -Data Analysts	Siemens	0-10 Yrs	Bangalore/Bengaluru
+2	Data Analyst	Enrich talents	0-4 Yrs	Bangalore/Bengaluru
+3	Senior Data Analyst	LatentView	2-6 Yrs	Chennai, Bangalore/Bengaluru
+4	Senior Data Analyst	FINNOVATION TECH SOLUTIONS PRIVATE LIMITED	3-6 Yrs	Bangalore/Bengaluru(Old Madras Road)
+5	Senior Data Analyst (Digital Services Analytics)	Dell Technologies	1-6 Yrs	Bangalore/Bengaluru
+6	Senior Data Analyst	Cerner	8-12 Yrs	Bangalore/Bengaluru
+7	Data Analyst	Myntra	1-3 Yrs	Bangalore/Bengaluru
+8	Senior Data analyst (Azure / MDM)	Syneos Health	4-7 Yrs	Hyderabad/Secunderabad, Gurgaon/Gurugram, Bang...
+9	Senior Professional Data Analyst	DXC Technology	3-7 Yrs	Bangalore/Bengaluru
+Q2: Write a python program to scrape data for “Data Scientist” Job position in “Bangalore” location. You have to scrape the job-title, job-location, company_name. You have to scrape first 10 jobs data.
+
+This task will be done in following steps:
+
+First get the webpage https://www.naukri.com/
+Enter “Data Scientist” in “Skill, Designations, Companies” field and enter “Bangalore” in “enter the location” field.
+Then click the search button.
+Then scrape the data for the first 10 jobs results you get.
+Finally create a dataframe of the scraped data.
+# Let's now import all the required libraries.
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+# let's first connect to the web driver
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.get('https://www.naukri.com/')
+# Finding element for job search bar
+search_field_designation=driver.find_element_by_class_name("suggestor-input") #job search bar
+search_field_designation.send_keys("Data Scientist")
+search_field_loaction=driver.find_element_by_xpath('/html/body/div/div[2]/div[3]/div/div/div[3]/div/div/div/input') #Location Search bar
+search_field_loaction.send_keys("Bangalore")
+search_button=driver.find_element_by_xpath("/html/body/div/div[2]/div[3]/div/div/div[6]")
+search_button.click()
+# Specifying the url of the webpage to be scraped
+url="https://www.naukri.com/data-scientist-jobs-in-bangalore?k=data%20scientist&l=bangalore"
+# Lets open the webpage through our web driver
+driver.get(url)
+So,Now lets first create 4 empty lists. In these lists the data will be stored while scraping. We have created 4 empty lists for 4 features which we have to extract.
+
+1Job_titles 2.company_names 3.locations_list
+
+First, We will extract all the tags where we have the job titles,lets me first show you on the webpage in which tags the job titles are put.
+
+job_titles=[]
+company_names=[]
+locations_list=[]
+titles_tags=driver.find_elements_by_xpath("//a[@class='title fw500 ellipsis']")
+titles_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="05b64cfe-17f2-4ea3-aba7-fb6f8c8664d4")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="cec9aaa5-b75d-4e49-b911-8ab40bb2c26f")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="45fdf945-25ee-4e76-89bc-ba3ee464b696")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="6701d634-f032-4331-bade-419974b03c16")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="2b0d2dc4-fc51-4ad1-a197-15ca89af47f0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="44172b5d-9687-4862-a198-e0e9f1a12fde")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="7c3fb6dc-5698-4610-b584-2d2e2482af5f")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="66363069-abd6-4b86-a810-10e7a21f1bbd")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="4b75996f-408f-488d-b275-d1c946e431dc")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="f678b0d4-3cec-4014-bdc7-887002b646c3")>]
+# Now the text of the title is inside the tags extracted above.
+for i in titles_tags:
+    title=i.text
+    job_titles.append(title)
+job_titles[0:10]
+['Senior Data Scientist',
+ 'Sr. Data Scientist',
+ 'Analyst - Data Scientist',
+ 'Senior Data Scientist',
+ 'Associate Data Scientist',
+ 'Sr. Associate - Data Scientist',
+ 'Senior Data Scientist',
+ 'Data Scientist',
+ 'Data Scientist',
+ 'Data Scientist']
+# So lets extract all the tags having the company names
+companies_tags=driver.find_elements_by_xpath("//a[@class='subTitle ellipsis fleft']")
+companies_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="7472972c-adfb-4eb4-822a-d7beebe3aabd")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="2815d26f-7b1b-4578-8751-b6766457d8d8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="b1b6ed41-3de7-4f09-8b56-4eb99398fce0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="dc3c873a-402f-46ea-bca4-c0d019900b55")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="17325d3a-67f7-4707-a2ef-a2f6f9f32426")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="ac862f9e-e916-450d-8f75-5376433acb1b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="2d199a47-b7fc-495b-95db-737a06447c40")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="739a1112-5806-4f79-9425-f071dcf2c0df")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="b5c929f3-1b40-4f10-a302-7eedd49683db")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="2ecd1550-30b3-438a-ab7e-0f9edd3d7ca4")>]
+for i in companies_tags:
+    company_name=i.text
+    company_names.append(company_name)
+company_names[0:10]
+['GSK India',
+ 'Silicon Valley Bank',
+ 'MilliporeSigma',
+ 'Flipkart',
+ 'experionglobal',
+ 'CHANGE LEADERS CONSULTING',
+ 'GSK India',
+ 'Thoucentric Technology Pvt ltd',
+ 'Roposo',
+ 'Silent Eight Pte Ltd']
+# So lets extract all the tags having the location names
+location_tags=driver.find_elements_by_xpath("//li[@class='fleft grey-text br2 placeHolderLi location']/span[1]")
+location_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="685572c9-1013-4dc3-a6d6-6b538af5e301")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="267715c1-548e-48c5-859a-d9b234f97926")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="be6c1b6f-d6cc-4f31-bc92-47353e22881a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="6b0e8cf6-60c1-45a8-95dc-143a823cdc13")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="82f99505-b193-471f-a628-f9aa55c23d43")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="88c23e0d-112c-4de5-b6d0-e11a7c8b5f34")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="cdf52a21-c131-4562-92af-fb6f35a84de6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="471892b5-acc2-4796-b42b-7231bb11f4c5")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="57c69203-c7e0-4d68-9fa7-94e1e347ff58")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="5c0340a683ac919b929cdd35415bbcf5", element="9bf5de7d-7c73-46a5-80bb-dd1f4e383096")>]
+for i in location_tags :
+    location=i.text
+    locations_list.append(location)
+locations_list[0:10]
+['Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Kochi/Cochin, Bangalore/Bengaluru, Trivandrum/Thiruvananthapuram',
+ 'Hyderabad/Secunderabad, Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru(HSR Layout +2)',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru']
+print(len(job_titles),len(company_names),len(locations_list))
+20 20 20
+#Import pandas as pd
+jobs=pd.DataFrame({})
+jobs['title']=job_titles[:10]
+jobs['company']=company_names[:10]
+jobs['location']=locations_list[:10]
+jobs
+title	company	location
+0	Senior Data Scientist	GSK India	Bangalore/Bengaluru
+1	Sr. Data Scientist	Silicon Valley Bank	Bangalore/Bengaluru
+2	Analyst - Data Scientist	MilliporeSigma	Bangalore/Bengaluru
+3	Senior Data Scientist	Flipkart	Bangalore/Bengaluru
+4	Associate Data Scientist	experionglobal	Kochi/Cochin, Bangalore/Bengaluru, Trivandrum/...
+5	Sr. Associate - Data Scientist	CHANGE LEADERS CONSULTING	Hyderabad/Secunderabad, Bangalore/Bengaluru
+6	Senior Data Scientist	GSK India	Bangalore/Bengaluru
+7	Data Scientist	Thoucentric Technology Pvt ltd	Bangalore/Bengaluru(HSR Layout +2)
+8	Data Scientist	Roposo	Bangalore/Bengaluru
+9	Data Scientist	Silent Eight Pte Ltd	Bangalore/Bengaluru
+Q3: In this question you have to scrape data using the filters available on the webpage as shown below: The task will be done as shown in the below steps:
+
+first get the webpage https://www.naukri.com/
+Enter “Data Scientist” in “Skill, Designations, and Companies” field.
+Then click the search button.
+Then apply the location filter and salary filter by checking the respective boxes
+Then scrape the data for the first 10 jobs results you get.
+Finally create a dataframe of the scraped data.
+# Lets now import all the required libraries
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+# Lets first connect to the web driver
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.get('https://www.naukri.com')
+# Finding element for job search bar
+search_field_designation=driver.find_element_by_class_name("suggestor-input") #job search bar
+search_field_designation.send_keys("Data Scientist")
+search_button=driver.find_element_by_xpath("/html/body/div/div[2]/div[3]/div/div/div[6]")
+search_button.click()
+# Specifying the url of the webpage to be scraped
+url="https://www.naukri.com/data-scientist-jobs?k=data%20scientist"
+# Lets open the webpage through our web driver
+driver.get(url)
+job_titles=[]
+company_names=[]
+locations_list=[]
+experience_list=[]
+salary_list=[]
+# So lets extract all the tags having the job-titles
+titles_tags=driver.find_elements_by_xpath("//a[@class='title fw500 ellipsis']")
+titles_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="a20c4b78-612e-40fc-81f4-7d7a25809b00")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="86a14d94-bd45-4957-9c63-1ed1c90ad69a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="4ec7940b-e913-4b6b-beab-d5dbaf600f1d")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="3c1e242c-c958-457c-97b7-679d2703808c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="4d45ed54-26f9-4ec1-ae87-63c1f9a32b0c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="8ee4844c-ed2b-4b0f-89fa-c3b7b0cec44b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="35c7179c-3dc5-4e0a-b747-7d4e4147252b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="a382e8df-cca6-4f78-b57f-afce1cc9d76c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="0c192599-6dac-4a5e-8b4a-68952b7207d7")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="0eb1240e-4789-4168-a611-f6c91e12fed8")>]
+# Now the text of the title is inside the tags extracted above.
+for i in titles_tags:
+    title=i.text
+    job_titles.append(title)
+job_titles[0:10]
+['Sr. Data Scientist',
+ 'Data Analyst/ Data Scientist Data Analytics & Visualizations',
+ 'Senior Data Scientist',
+ 'Data Scientist',
+ 'Senior Data Scientist',
+ 'Data Analyst / Data Scientist',
+ 'Opening For Data Scientist',
+ 'Data Scientist / Machine learning Engineer',
+ 'Senior Data Scientist',
+ 'Data Scientist']
+# So lets extract all the tags having the company names
+companies_tags=driver.find_elements_by_xpath("//a[@class='subTitle ellipsis fleft']")
+companies_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="c25a52c6-4faf-49d6-a084-4a7848079f37")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="2bd2f36a-3539-4ba4-a045-cf18bf993bda")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="162caa4a-dfe0-4c93-89de-50afd969eddd")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="96badfb7-ee4a-4a81-9d26-10ccc2293e66")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="43f3f350-6dc9-4f7a-af41-f30559c3cf31")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="1e33d54a-e414-4fd6-80e0-0938acc9b470")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="9dbaeca2-b833-4d28-bc98-ddf43f473409")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="0154c146-8ddb-4687-9805-956be72840f8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="d5c7b101-dbec-4b85-bb77-888627f52c0e")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="d453157f-f69c-4df0-aaf6-c646e2950814")>]
+for i in companies_tags:
+    company_name=i.text
+    company_names.append(company_name)
+company_names[0:10]
+['Thales',
+ 'SGS GLOBAL SERVICES PRIVATE LIMITED',
+ 'Synaptic',
+ 'Genpact',
+ 'Michelin',
+ 'JK Technosoft',
+ 'Care Health Insurance',
+ 'Leading US MNC into Analytics',
+ 'GSK India',
+ 'Applied Materials']
+# so lets extract all the tags having the experience required data
+
+experience_tags=driver.find_elements_by_xpath("//li[@class='fleft grey-text br2 placeHolderLi experience']/span[1]")
+experience_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="84e9b826-0649-45e6-b091-11380646b832")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="44b475ac-8ffd-4de3-b292-a6b192d05bf6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="913bca57-30c7-4a1c-b32c-ab2aab8d4bb6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="ea5c505e-58c7-489b-96df-150da6914dd6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="1269c3db-ea80-4f60-921d-971994f8aa92")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="e8ba49bc-cf58-473a-b306-3d1d3fd32e0b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="29a6e0ad-b645-4e27-a084-7fa6aa05e69c")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="7034b75f-8cee-4d40-b893-ef09b34b7af7")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="093c7265-59b2-474d-8367-b298db913374")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="36246968-5a06-48c3-90ae-d37615ba8103")>]
+for i in experience_tags:
+    experience=i.text
+    experience_list.append(experience)
+experience_list[0:10]
+['3-7 Yrs',
+ '2-4 Yrs',
+ '3-7 Yrs',
+ '7-12 Yrs',
+ '3-7 Yrs',
+ '5-7 Yrs',
+ '1-5 Yrs',
+ '2-7 Yrs',
+ '5-9 Yrs',
+ '2-7 Yrs']
+location_tags=driver.find_elements_by_xpath("//li[@class='fleft grey-text br2 placeHolderLi location']/span[1]")
+location_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="d3b0d207-3c33-47f0-bffe-1e502198a417")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="7b97fbee-0fb9-442d-87c5-5c95699910b8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="19d0b9d1-0230-4a01-b77a-a54b1c0e47d0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="17e7cc06-12ff-47ee-9b28-f4f089c34556")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="f404fc73-636a-4608-9b36-3fc773966cbe")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="7067422a-5ab7-4297-a052-12503d4503b6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="06116e89-7c7b-491f-81b8-b63ab8b960f6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="6fbb58d0-c36a-45a2-86a8-62ceb7454386")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="49f8a3bd-6b60-4d81-8162-802734d26fd5")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="04be0589-3bd6-4d43-9856-5b0cfb6872e3")>]
+for i in location_tags :
+    location=i.text
+    locations_list.append(location)
+locations_list[0:10]
+['Gurgaon/Gurugram',
+ 'Noida(Sector-2 Noida)',
+ 'Gurgaon/Gurugram',
+ 'Noida, Hyderabad/Secunderabad, Gurgaon/Gurugram, Bangalore/Bengaluru',
+ 'Pune',
+ 'Noida, Hyderabad/Secunderabad, Bangalore/Bengaluru',
+ 'Gurgaon/Gurugram',
+ 'Bangalore/Bengaluru, Delhi / NCR',
+ 'Bangalore/Bengaluru',
+ 'Bangalore/Bengaluru']
+salary_tags=driver.find_elements_by_xpath("//li[@class='fleft grey-text br2 placeHolderLi salary']/span[1]")
+salary_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="c39e951b-dc0e-45db-af6e-46b560c75f35")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="e1b33c63-fe92-43f2-bb9d-d56dfe9e9384")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="a8e08e4b-e4bf-43eb-81d7-40dc66f927b9")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="789981d7-238e-4f6a-8acc-d78e26db9bb9")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="f0dbca33-4f1f-461c-bb37-83058c4ec9a2")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="44a26f4e-b8e9-4466-ae24-6b226928b498")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="f93d04d7-0631-4a88-835f-4f4d24b127ec")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="44430119-8092-416e-8fff-8cd709e7a013")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="f29590bf-74e9-4e2e-b41e-c72f7615709a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="35211edd32ba9deeff0fff625ba0f2be", element="d7866bad-04ff-49a1-9461-f94c4ef54d10")>]
+for i in salary_tags :
+    salary=i.text
+    salary_list.append(salary)
+salary_list[0:10]
+['Not disclosed',
+ '7,50,000 - 12,00,000 PA.',
+ 'Not disclosed',
+ 'Not disclosed',
+ 'Not disclosed',
+ 'Not disclosed',
+ '3,00,000 - 7,00,000 PA.',
+ '15,00,000 - 25,00,000 PA.',
+ 'Not disclosed',
+ 'Not disclosed']
+#So lets check th length of ech element.
+#Import pandas as pd
+jobs=pd.DataFrame({})
+jobs['Title']=job_titles[:10]
+jobs['Company']=company_names[:10]
+jobs['Experience_required']=experience_list[:10]
+jobs['Location']=locations_list[:10]
+jobs['Salary']=salary_list[:10]
+jobs
+Title	Company	Experience_required	Location	Salary
+0	Sr. Data Scientist	Thales	3-7 Yrs	Gurgaon/Gurugram	Not disclosed
+1	Data Analyst/ Data Scientist Data Analytics & ...	SGS GLOBAL SERVICES PRIVATE LIMITED	2-4 Yrs	Noida(Sector-2 Noida)	7,50,000 - 12,00,000 PA.
+2	Senior Data Scientist	Synaptic	3-7 Yrs	Gurgaon/Gurugram	Not disclosed
+3	Data Scientist	Genpact	7-12 Yrs	Noida, Hyderabad/Secunderabad, Gurgaon/Gurugra...	Not disclosed
+4	Senior Data Scientist	Michelin	3-7 Yrs	Pune	Not disclosed
+5	Data Analyst / Data Scientist	JK Technosoft	5-7 Yrs	Noida, Hyderabad/Secunderabad, Bangalore/Benga...	Not disclosed
+6	Opening For Data Scientist	Care Health Insurance	1-5 Yrs	Gurgaon/Gurugram	3,00,000 - 7,00,000 PA.
+7	Data Scientist / Machine learning Engineer	Leading US MNC into Analytics	2-7 Yrs	Bangalore/Bengaluru, Delhi / NCR	15,00,000 - 25,00,000 PA.
+8	Senior Data Scientist	GSK India	5-9 Yrs	Bangalore/Bengaluru	Not disclosed
+9	Data Scientist	Applied Materials	2-7 Yrs	Bangalore/Bengaluru	Not disclosed
+Q4: Scrape data of first 100 sunglasses listings on flipkart.com. You have to scrape four attributes:
+
+# Lets now import all the required libraries
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+# Lets first connect to the web driver
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.get('https://www.flipkart.com/')
+# Finding element for search bar
+search_g= driver.find_element_by_xpath("//input[@class='_3704LK']") 
+search_g
+<selenium.webdriver.remote.webelement.WebElement (session="e3b81a0c62e69b199248c70efe30a2ec", element="509057e9-2c59-4363-94da-15e36bfacae1")>
+# write on search bar
+search_g.send_keys('sunglasses')
+search_button=driver.find_element_by_xpath("//button[@class='L0Z3Pu']")
+search_button.click()
+B_name=[]
+Price=[]
+P_desc=[]
+for i in range(3):
+    b_name=driver.find_elements_by_xpath("//div[@class='_2WkVRV']")
+   
+ for j  in b_name:
+        B_name.append(j.text)
+B_name[:100]
+['john jacobs',
+ 'ROZZETTA CRAFT',
+ 'Elligator',
+ 'New Specs',
+ 'SRPM',
+ 'PIRASO',
+ 'SHAAH COLLECTIONS',
+ 'Singco India',
+ 'GANSTA',
+ 'Fastrack',
+ 'SUNBEE',
+ 'Sewell',
+ 'Lee Topper',
+ 'Elligator',
+ 'Lee Topper',
+ 'Singco India',
+ 'kingsunglasses',
+ 'PIRASO',
+ 'kingsunglasses',
+ 'Singco India',
+ 'PIRASO',
+ 'SRPM',
+ 'PIRASO',
+ 'ROZZETTA CRAFT',
+ 'New Specs',
+ 'PIRASO',
+ 'elegante',
+ 'Sewell',
+ 'SRPM',
+ 'kingsunglasses',
+ 'Fastrack',
+ 'Amour Propre',
+ 'DEIXELS',
+ 'Mi',
+ 'ROZZETTA CRAFT',
+ 'AUTOSITE',
+ 'SUNBEE',
+ 'hipe',
+ 'PHENOMENAL',
+ 'ROZZETTA CRAFT']
+for i in range(3): 
+    p_desc=driver.find_elements_by_xpath("//a[@class='IRpwTa']")
+for k in p_desc:
+        P_desc.append(k.text)
+P_desc[:100]
+    
+['Polarized, UV Protection Aviator Sunglasses (53)',
+ 'UV Protection, Gradient Round Sunglasses (Free Size)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (50)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection, Polarized, Mirrored Rectangular Sunglass...',
+ 'UV Protection, Riding Glasses, Others Aviator, Wayfarer...',
+ 'UV Protection, Riding Glasses Wayfarer Sunglasses (53)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection, Polarized Wayfarer Sunglasses (Free Size...',
+ 'Polarized Butterfly Sunglasses (Free Size)',
+ 'Riding Glasses Wrap-around Sunglasses (Free Size)',
+ 'UV Protection Round Sunglasses (53)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'Riding Glasses, UV Protection Clubmaster, Wayfarer Sung...',
+ 'UV Protection, Riding Glasses, Mirrored Wayfarer Sungla...',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection Round Sunglasses (Free Size)',
+ 'UV Protection Aviator Sunglasses (45)',
+ 'UV Protection Wayfarer Sunglasses (32)',
+ 'Others Wayfarer, Retro Square Sunglasses (50)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection Aviator Sunglasses (62)',
+ 'Mirrored, UV Protection, Riding Glasses, Others Round S...',
+ 'UV Protection Aviator Sunglasses (58)',
+ 'Polarized, Riding Glasses, Night Vision Sports, Wrap-ar...',
+ 'Polarized Butterfly Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (54)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection Wayfarer Sunglasses (Free Size)',
+ 'Others Wayfarer Sunglasses (52)',
+ 'UV Protection Aviator, Wayfarer Sunglasses (Free Size)',
+ 'Polarized Aviator Sunglasses (Free Size)',
+ 'UV Protection Retro Square Sunglasses (Free Size)',
+ 'Night Vision Rectangular Sunglasses (63)',
+ 'UV Protection, Polarized, Mirrored Retro Square Sunglas...',
+ 'Mirrored, UV Protection, Gradient Round Sunglasses (55)',
+ 'UV Protection Retro Square Sunglasses (53)',
+ 'UV Protection, Gradient Retro Square Sunglasses (62)']
+for i in range(3): 
+    price =driver.find_elements_by_xpath("//div[@class='_30jeq3']")
+for l in price:
+        Price.append(l.text)
+Price[:100] 
+['₹2,500',
+ '₹342',
+ '₹295',
+ '₹269',
+ '₹249',
+ '₹249',
+ '₹185',
+ '₹217',
+ '₹198',
+ '₹679',
+ '₹273',
+ '₹649',
+ '₹275',
+ '₹229',
+ '₹199',
+ '₹299',
+ '₹209',
+ '₹225',
+ '₹329',
+ '₹329',
+ '₹225',
+ '₹239',
+ '₹225',
+ '₹616',
+ '₹299',
+ '₹399',
+ '₹499',
+ '₹649',
+ '₹197',
+ '₹214',
+ '₹759',
+ '₹162',
+ '₹229',
+ '₹939',
+ '₹474',
+ '₹149',
+ '₹249',
+ '₹170',
+ '₹339',
+ '₹474']
+#So lets check th length of ech element.
+print(len(B_name[:40])),print(len(Price[:40])),print(len(P_desc[:40]))
+40
+40
+40
+(None, None, None)
+#Import pandas as pd
+sun_gl=pd.DataFrame({})
+sun_gl['Brand_name']=B_name[:40]
+sun_gl['P_price']=Price[:40]
+sun_gl['Pr_desc']=P_desc[:40]
+sun_gl
+Brand_name	P_price	Pr_desc
+0	john jacobs	₹2,500	Polarized, UV Protection Aviator Sunglasses (53)
+1	ROZZETTA CRAFT	₹342	UV Protection, Gradient Round Sunglasses (Free...
+2	Elligator	₹295	UV Protection Round Sunglasses (54)
+3	New Specs	₹269	UV Protection Rectangular Sunglasses (Free Size)
+4	SRPM	₹249	UV Protection Wayfarer Sunglasses (50)
+5	PIRASO	₹249	UV Protection Aviator Sunglasses (54)
+6	SHAAH COLLECTIONS	₹185	UV Protection, Polarized, Mirrored Rectangular...
+7	Singco India	₹217	UV Protection, Riding Glasses, Others Aviator,...
+8	GANSTA	₹198	UV Protection, Riding Glasses Wayfarer Sunglas...
+9	Fastrack	₹679	UV Protection Rectangular Sunglasses (Free Size)
+10	SUNBEE	₹273	UV Protection, Polarized Wayfarer Sunglasses (...
+11	Sewell	₹649	Polarized Butterfly Sunglasses (Free Size)
+12	Lee Topper	₹275	Riding Glasses Wrap-around Sunglasses (Free Size)
+13	Elligator	₹229	UV Protection Round Sunglasses (53)
+14	Lee Topper	₹199	UV Protection Rectangular Sunglasses (Free Size)
+15	Singco India	₹299	Riding Glasses, UV Protection Clubmaster, Wayf...
+16	kingsunglasses	₹209	UV Protection, Riding Glasses, Mirrored Wayfar...
+17	PIRASO	₹225	UV Protection Aviator Sunglasses (54)
+18	kingsunglasses	₹329	UV Protection Round Sunglasses (Free Size)
+19	Singco India	₹329	UV Protection Aviator Sunglasses (45)
+20	PIRASO	₹225	UV Protection Wayfarer Sunglasses (32)
+21	SRPM	₹239	Others Wayfarer, Retro Square Sunglasses (50)
+22	PIRASO	₹225	UV Protection Aviator Sunglasses (54)
+23	ROZZETTA CRAFT	₹616	UV Protection Aviator Sunglasses (62)
+24	New Specs	₹299	Mirrored, UV Protection, Riding Glasses, Other...
+25	PIRASO	₹399	UV Protection Aviator Sunglasses (58)
+26	elegante	₹499	Polarized, Riding Glasses, Night Vision Sports...
+27	Sewell	₹649	Polarized Butterfly Sunglasses (Free Size)
+28	SRPM	₹197	UV Protection Wayfarer Sunglasses (54)
+29	kingsunglasses	₹214	UV Protection Round Sunglasses (54)
+30	Fastrack	₹759	UV Protection Wayfarer Sunglasses (Free Size)
+31	Amour Propre	₹162	Others Wayfarer Sunglasses (52)
+32	DEIXELS	₹229	UV Protection Aviator, Wayfarer Sunglasses (Fr...
+33	Mi	₹939	Polarized Aviator Sunglasses (Free Size)
+34	ROZZETTA CRAFT	₹474	UV Protection Retro Square Sunglasses (Free Size)
+35	AUTOSITE	₹149	Night Vision Rectangular Sunglasses (63)
+36	SUNBEE	₹249	UV Protection, Polarized, Mirrored Retro Squar...
+37	hipe	₹170	Mirrored, UV Protection, Gradient Round Sungla...
+38	PHENOMENAL	₹339	UV Protection Retro Square Sunglasses (53)
+39	ROZZETTA CRAFT	₹474	UV Protection, Gradient Retro Square Sunglasse...
+for i in range(3):
+    b_name=driver.find_elements_by_xpath("//div[@class='_2WkVRV']")
+    p_desc=driver.find_elements_by_xpath("//a[@class='IRpwTa']")
+    price =driver.find_elements_by_xpath("//div[@class='_30jeq3']")
+    
+    for j  in b_name:
+        B_name.append(j.text)
+    B_name[:100]
+        
+    for k in p_desc:
+        P_desc.append(k.text)
+    P_desc[:100]
+        
+    for l in price:
+        Price.append(l.text)
+    Price[:100]
+
+    
+B_name[:100]
+['john jacobs',
+ 'ROZZETTA CRAFT',
+ 'Elligator',
+ 'New Specs',
+ 'SRPM',
+ 'PIRASO',
+ 'SHAAH COLLECTIONS',
+ 'Singco India',
+ 'GANSTA',
+ 'Fastrack',
+ 'SUNBEE',
+ 'Sewell',
+ 'Lee Topper',
+ 'Elligator',
+ 'Lee Topper',
+ 'Singco India',
+ 'kingsunglasses',
+ 'PIRASO',
+ 'kingsunglasses',
+ 'Singco India',
+ 'PIRASO',
+ 'SRPM',
+ 'PIRASO',
+ 'ROZZETTA CRAFT',
+ 'New Specs',
+ 'PIRASO',
+ 'elegante',
+ 'Sewell',
+ 'SRPM',
+ 'kingsunglasses',
+ 'Fastrack',
+ 'Amour Propre',
+ 'DEIXELS',
+ 'Mi',
+ 'ROZZETTA CRAFT',
+ 'AUTOSITE',
+ 'SUNBEE',
+ 'hipe',
+ 'PHENOMENAL',
+ 'ROZZETTA CRAFT',
+ 'kingsunglasses',
+ 'kingsunglasses',
+ 'Elligator',
+ 'john jacobs',
+ 'ROYAL SON',
+ 'SHAAH COLLECTIONS',
+ 'ROZZETTA CRAFT',
+ 'ROZZETTA CRAFT',
+ 'Fastrack',
+ 'New Specs',
+ 'SUNBEE',
+ 'Singco India',
+ 'PIRASO',
+ 'NuVew',
+ 'Fastrack',
+ 'Sewell',
+ 'SRPM',
+ 'hipe',
+ 'SHAAH COLLECTIONS',
+ 'Singco India',
+ 'kingsunglasses',
+ 'Fastrack',
+ 'Fastrack',
+ 'Singco India',
+ 'Fastrack',
+ 'Fastrack',
+ 'AISLIN',
+ 'Sewell',
+ 'hipe',
+ 'AISLIN',
+ 'ROZZETTA CRAFT',
+ 'AUTOSITE',
+ 'SRPM',
+ 'Singco India',
+ 'PHENOMENAL',
+ 'Amour Propre',
+ 'AISLIN',
+ 'Elligator',
+ 'elegante',
+ 'ROZZETTA CRAFT',
+ 'kingsunglasses',
+ 'kingsunglasses',
+ 'Elligator',
+ 'john jacobs',
+ 'ROYAL SON',
+ 'SHAAH COLLECTIONS',
+ 'ROZZETTA CRAFT',
+ 'ROZZETTA CRAFT',
+ 'Fastrack',
+ 'New Specs',
+ 'SUNBEE',
+ 'Singco India',
+ 'PIRASO',
+ 'NuVew',
+ 'Fastrack',
+ 'Sewell',
+ 'SRPM',
+ 'hipe',
+ 'SHAAH COLLECTIONS',
+ 'Singco India']
+P_desc[:100]
+['Polarized, UV Protection Aviator Sunglasses (53)',
+ 'UV Protection, Gradient Round Sunglasses (Free Size)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (50)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection, Polarized, Mirrored Rectangular Sunglass...',
+ 'UV Protection, Riding Glasses, Others Aviator, Wayfarer...',
+ 'UV Protection, Riding Glasses Wayfarer Sunglasses (53)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection, Polarized Wayfarer Sunglasses (Free Size...',
+ 'Polarized Butterfly Sunglasses (Free Size)',
+ 'Riding Glasses Wrap-around Sunglasses (Free Size)',
+ 'UV Protection Round Sunglasses (53)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'Riding Glasses, UV Protection Clubmaster, Wayfarer Sung...',
+ 'UV Protection, Riding Glasses, Mirrored Wayfarer Sungla...',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection Round Sunglasses (Free Size)',
+ 'UV Protection Aviator Sunglasses (45)',
+ 'UV Protection Wayfarer Sunglasses (32)',
+ 'Others Wayfarer, Retro Square Sunglasses (50)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection Aviator Sunglasses (62)',
+ 'Mirrored, UV Protection, Riding Glasses, Others Round S...',
+ 'UV Protection Aviator Sunglasses (58)',
+ 'Polarized, Riding Glasses, Night Vision Sports, Wrap-ar...',
+ 'Polarized Butterfly Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (54)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection Wayfarer Sunglasses (Free Size)',
+ 'Others Wayfarer Sunglasses (52)',
+ 'UV Protection Aviator, Wayfarer Sunglasses (Free Size)',
+ 'Polarized Aviator Sunglasses (Free Size)',
+ 'UV Protection Retro Square Sunglasses (Free Size)',
+ 'Night Vision Rectangular Sunglasses (63)',
+ 'UV Protection, Polarized, Mirrored Retro Square Sunglas...',
+ 'Mirrored, UV Protection, Gradient Round Sunglasses (55)',
+ 'UV Protection Retro Square Sunglasses (53)',
+ 'UV Protection, Gradient Retro Square Sunglasses (62)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection Wayfarer Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (50)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection, Polarized, Mirrored Rectangular Sunglass...',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'Riding Glasses Wrap-around Sunglasses (Free Size)',
+ 'UV Protection, Polarized Wayfarer Sunglasses (Free Size...',
+ 'UV Protection Round Sunglasses (53)',
+ 'Mirrored, UV Protection, Riding Glasses, Others Round S...',
+ 'UV Protection, Riding Glasses, Mirrored Wayfarer Sungla...',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (32)',
+ 'Others Wayfarer, Retro Square Sunglasses (50)',
+ 'UV Protection, Riding Glasses Wayfarer Sunglasses (53)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'Polarized, UV Protection Aviator Sunglasses (53)',
+ 'UV Protection Aviator Sunglasses (58)',
+ 'UV Protection, Mirrored Sports Sunglasses (Free Size)',
+ 'Polarized, Riding Glasses, Night Vision Sports, Wrap-ar...',
+ 'UV Protection, Gradient Round Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (54)',
+ 'UV Protection Wayfarer Sunglasses (Free Size)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection, Riding Glasses, Others Aviator, Wayfarer...',
+ 'UV Protection Retro Square Sunglasses (Free Size)',
+ 'UV Protection Aviator, Wayfarer Sunglasses (Free Size)',
+ 'UV Protection, Polarized, Mirrored Retro Square Sunglas...',
+ 'UV Protection Aviator Sunglasses (88)',
+ 'UV Protection, Gradient Retro Square Sunglasses (Free S...',
+ 'Mirrored, UV Protection Wayfarer Sunglasses (Free Size)',
+ 'UV Protection, Night Vision Wayfarer Sunglasses (Free S...',
+ 'UV Protection Aviator Sunglasses (50)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection Wayfarer Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (50)',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'UV Protection, Polarized, Mirrored Rectangular Sunglass...',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'Riding Glasses Wrap-around Sunglasses (Free Size)',
+ 'UV Protection, Polarized Wayfarer Sunglasses (Free Size...',
+ 'UV Protection Round Sunglasses (53)',
+ 'Mirrored, UV Protection, Riding Glasses, Others Round S...',
+ 'UV Protection, Riding Glasses, Mirrored Wayfarer Sungla...',
+ 'UV Protection Rectangular Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (32)',
+ 'Others Wayfarer, Retro Square Sunglasses (50)',
+ 'UV Protection, Riding Glasses Wayfarer Sunglasses (53)',
+ 'UV Protection Aviator Sunglasses (54)',
+ 'Polarized, UV Protection Aviator Sunglasses (53)',
+ 'UV Protection Aviator Sunglasses (58)',
+ 'UV Protection, Mirrored Sports Sunglasses (Free Size)',
+ 'Polarized, Riding Glasses, Night Vision Sports, Wrap-ar...',
+ 'UV Protection, Gradient Round Sunglasses (Free Size)',
+ 'UV Protection Wayfarer Sunglasses (54)',
+ 'UV Protection Wayfarer Sunglasses (Free Size)',
+ 'UV Protection Round Sunglasses (54)',
+ 'UV Protection, Riding Glasses, Others Aviator, Wayfarer...']
+Price[:100]
+['₹2,500',
+ '₹342',
+ '₹295',
+ '₹269',
+ '₹249',
+ '₹249',
+ '₹185',
+ '₹217',
+ '₹198',
+ '₹679',
+ '₹273',
+ '₹649',
+ '₹275',
+ '₹229',
+ '₹199',
+ '₹299',
+ '₹209',
+ '₹225',
+ '₹329',
+ '₹329',
+ '₹225',
+ '₹239',
+ '₹225',
+ '₹616',
+ '₹299',
+ '₹399',
+ '₹499',
+ '₹649',
+ '₹197',
+ '₹214',
+ '₹759',
+ '₹162',
+ '₹229',
+ '₹939',
+ '₹474',
+ '₹149',
+ '₹249',
+ '₹170',
+ '₹339',
+ '₹474',
+ '₹232',
+ '₹303',
+ '₹295',
+ '₹759',
+ '₹249',
+ '₹269',
+ '₹249',
+ '₹590',
+ '₹185',
+ '₹679',
+ '₹275',
+ '₹272',
+ '₹273',
+ '₹229',
+ '₹299',
+ '₹323',
+ '₹209',
+ '₹199',
+ '₹225',
+ '₹569',
+ '₹239',
+ '₹198',
+ '₹225',
+ '₹2,500',
+ '₹399',
+ '₹185',
+ '₹499',
+ '₹342',
+ '₹197',
+ '₹759',
+ '₹214',
+ '₹217',
+ '₹474',
+ '₹229',
+ '₹249',
+ '₹320',
+ '₹307',
+ '₹269',
+ '₹299',
+ '₹313',
+ '₹232',
+ '₹303',
+ '₹295',
+ '₹759',
+ '₹249',
+ '₹269',
+ '₹249',
+ '₹590',
+ '₹185',
+ '₹679',
+ '₹275',
+ '₹272',
+ '₹273',
+ '₹229',
+ '₹299',
+ '₹323',
+ '₹209',
+ '₹199',
+ '₹225',
+ '₹569']
+#Import pandas as pd
+sun_gl=pd.DataFrame({})
+sun_gl['Brand_name']=B_name[:100]
+sun_gl['P_price']=Price[:100]
+sun_gl['Pr_desc']=P_desc[:100]
+sun_gl
+Brand_name	P_price	Pr_desc
+0	john jacobs	₹2,500	Polarized, UV Protection Aviator Sunglasses (53)
+1	ROZZETTA CRAFT	₹342	UV Protection, Gradient Round Sunglasses (Free...
+2	Elligator	₹295	UV Protection Round Sunglasses (54)
+3	New Specs	₹269	UV Protection Rectangular Sunglasses (Free Size)
+4	SRPM	₹249	UV Protection Wayfarer Sunglasses (50)
+...	...	...	...
+95	Sewell	₹323	UV Protection, Gradient Round Sunglasses (Free...
+96	SRPM	₹209	UV Protection Wayfarer Sunglasses (54)
+97	hipe	₹199	UV Protection Wayfarer Sunglasses (Free Size)
+98	SHAAH COLLECTIONS	₹225	UV Protection Round Sunglasses (54)
+99	Singco India	₹569	UV Protection, Riding Glasses, Others Aviator,...
+100 rows × 3 columns
+
+Q6: Scrape data for first 100 sneakers you find when you visit flipkart.com andsearch for “sneakers” in the search field.
+
+# Lets now import all the required libraries
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+# Lets first connect to the web driver
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.get('https://www.flipkart.com/')
+# Finding element for search bar
+search_g= driver.find_element_by_xpath("//input[@class='_3704LK']") 
+search_g
+<selenium.webdriver.remote.webelement.WebElement (session="921e8951e874fa92a80655d2e9186deb", element="ab2280b3-7af4-4a96-9617-7b02cc8c85a5")>
+# write on search bar
+search_g.send_keys('sneakers')
+search_button=driver.find_element_by_xpath("//button[@class='L0Z3Pu']")
+search_button.click()
+B_name=[]
+Price=[]
+P_desc=[]
+Discount=[]
+for i in range(3):
+    b_name=driver.find_elements_by_xpath("//div[@class='_2WkVRV']")
+    p_desc=driver.find_elements_by_xpath("//a[@class='IRpwTa']")
+    price =driver.find_elements_by_xpath("//div[@class='_30jeq3']")
+    discount=driver.find_elements_by_xpath("//div[@class='_3Ay6Sb']")
+    
+    for j  in b_name:
+        B_name.append(j.text)
+    B_name[:100]    
+    
+    
+    
+    for k in p_desc:
+        P_desc.append(k.text)
+    P_desc[:100] 
+    
+    
+    for l in price:
+        Price.append(l.text)
+    Price[:100] 
+    
+    
+    for t in discount:
+        Discount.append(t.text)
+    Discount[:100]
+B_name[:100]
+['Echor',
+ 'HIGHLANDER',
+ 'ASTEROID',
+ 'URBANBOX',
+ 'Magnolia',
+ 'KWIK FIT',
+ 'BRUTON',
+ 'Roadster',
+ 'Chevit',
+ 'Chevit',
+ 'Chevit',
+ 'Echor',
+ 'corsac',
+ 'aadi',
+ 'World Wear Footwear',
+ 'Mr ShoesWala',
+ 'Chevit',
+ 'World Wear Footwear',
+ 'D-SNEAKERZ',
+ 'RapidBox',
+ 'ASTEROID',
+ 'SCATCHITE',
+ 'Layasa',
+ 'Echor',
+ 'Chevit',
+ 'ZF - ALFIYA',
+ 'Labbin',
+ 'RapidBox',
+ 'Shoes Bank',
+ 'Rzisbo',
+ 'CLYMB',
+ 'pollachief',
+ 'World Wear Footwear',
+ 'Hida',
+ 'BRUTON',
+ 'CLYMB',
+ 'Kraasa',
+ 'aadi',
+ 'Kraasa',
+ 'Roadster',
+ 'Echor',
+ 'HIGHLANDER',
+ 'ASTEROID',
+ 'URBANBOX',
+ 'Magnolia',
+ 'KWIK FIT',
+ 'BRUTON',
+ 'Roadster',
+ 'Chevit',
+ 'Chevit',
+ 'Chevit',
+ 'Echor',
+ 'corsac',
+ 'aadi',
+ 'World Wear Footwear',
+ 'Mr ShoesWala',
+ 'Chevit',
+ 'World Wear Footwear',
+ 'D-SNEAKERZ',
+ 'RapidBox',
+ 'ASTEROID',
+ 'SCATCHITE',
+ 'Layasa',
+ 'Echor',
+ 'Chevit',
+ 'ZF - ALFIYA',
+ 'Labbin',
+ 'RapidBox',
+ 'Shoes Bank',
+ 'Rzisbo',
+ 'CLYMB',
+ 'pollachief',
+ 'World Wear Footwear',
+ 'Hida',
+ 'BRUTON',
+ 'CLYMB',
+ 'Kraasa',
+ 'aadi',
+ 'Kraasa',
+ 'Roadster',
+ 'Echor',
+ 'HIGHLANDER',
+ 'ASTEROID',
+ 'URBANBOX',
+ 'Magnolia',
+ 'KWIK FIT',
+ 'BRUTON',
+ 'Roadster',
+ 'Chevit',
+ 'Chevit',
+ 'Chevit',
+ 'Echor',
+ 'corsac',
+ 'aadi',
+ 'World Wear Footwear',
+ 'Mr ShoesWala',
+ 'Chevit',
+ 'World Wear Footwear',
+ 'D-SNEAKERZ',
+ 'RapidBox']
+P_desc[:100]
+["Men's casual shoes sports shoes black sneaker Sneakers ...",
+ 'Sneakers For Men',
+ "Original Luxury Branded Fashionable Men's Casual Walkin...",
+ 'Sneakers For Men',
+ 'Kwik FIT casual sneaker shoes and partywear shoes Casua...',
+ 'Modern Trendy Sneakers Shoes Sneakers For Men',
+ 'Men White Solid Sneakers Sneakers For Men',
+ 'Super Stylish & Trendy Combo Pack of 02 Pairs Sneakers ...',
+ 'Perfect Combo Pack of 02 Pairs Casual Sneakers Outdoor ...',
+ 'Perfect & Affordable Combo Pack of 02 Pairs Sneakers Ou...',
+ "Men's Casual sneaker shoes running shoes walking shoes ...",
+ 'STYLISH MENS BLACK SNEAKER Sneakers For Men',
+ 'Sneakers For Men',
+ '5013-Latest Collection Stylish & Trendy of casuals Snea...',
+ "Men's Casual Shoes in White Color Walking Running Gymwe...",
+ '516 Trendy Star Perfect Sneakers For Men',
+ '5011-Latest Collection Stylish & Trendy Casual Sneakers...',
+ "Casual , Partywear Sneakers Shoes For Men's And Boys Wh...",
+ 'Original Luxury Branded Black Fancy Casual Walking Part...',
+ 'Sneakers Sneakers For Men',
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ 'Super 445 Fashion Sneakers For Men',
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ "White Sneaker For Men's/Boy's Sneakers For Men",
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ 'Casual Sneaker for Men Sneakers For Men',
+ 'Men 5014 Latest Collection Stylish Casual Sports Loafer...',
+ 'Combo Pack Of 4 Casual Shoes Loafer Shoes Sneakers For ...',
+ "Perfect Sports Shoes for Men's Running ,Cycling & Trekk...",
+ 'Series 7 Sneakers For Men',
+ 'Sneakers For Men',
+ 'Casuals, Canvas, Partywear Sneakers For Men',
+ 'Sneakers For Men',
+ "Men's casual shoes sports shoes black sneaker Sneakers ...",
+ 'Sneakers For Men',
+ "Original Luxury Branded Fashionable Men's Casual Walkin...",
+ 'Sneakers For Men',
+ 'Kwik FIT casual sneaker shoes and partywear shoes Casua...',
+ 'Modern Trendy Sneakers Shoes Sneakers For Men',
+ 'Men White Solid Sneakers Sneakers For Men',
+ 'Super Stylish & Trendy Combo Pack of 02 Pairs Sneakers ...',
+ 'Perfect Combo Pack of 02 Pairs Casual Sneakers Outdoor ...',
+ 'Perfect & Affordable Combo Pack of 02 Pairs Sneakers Ou...',
+ "Men's Casual sneaker shoes running shoes walking shoes ...",
+ 'STYLISH MENS BLACK SNEAKER Sneakers For Men',
+ 'Sneakers For Men',
+ '5013-Latest Collection Stylish & Trendy of casuals Snea...',
+ "Men's Casual Shoes in White Color Walking Running Gymwe...",
+ '516 Trendy Star Perfect Sneakers For Men',
+ '5011-Latest Collection Stylish & Trendy Casual Sneakers...',
+ "Casual , Partywear Sneakers Shoes For Men's And Boys Wh...",
+ 'Original Luxury Branded Black Fancy Casual Walking Part...',
+ 'Sneakers Sneakers For Men',
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ 'Super 445 Fashion Sneakers For Men',
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ "White Sneaker For Men's/Boy's Sneakers For Men",
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ 'Casual Sneaker for Men Sneakers For Men',
+ 'Men 5014 Latest Collection Stylish Casual Sports Loafer...',
+ 'Combo Pack Of 4 Casual Shoes Loafer Shoes Sneakers For ...',
+ "Perfect Sports Shoes for Men's Running ,Cycling & Trekk...",
+ 'Series 7 Sneakers For Men',
+ 'Sneakers For Men',
+ 'Casuals, Canvas, Partywear Sneakers For Men',
+ 'Sneakers For Men',
+ "Men's casual shoes sports shoes black sneaker Sneakers ...",
+ 'Sneakers For Men',
+ "Original Luxury Branded Fashionable Men's Casual Walkin...",
+ 'Sneakers For Men',
+ 'Kwik FIT casual sneaker shoes and partywear shoes Casua...',
+ 'Modern Trendy Sneakers Shoes Sneakers For Men',
+ 'Men White Solid Sneakers Sneakers For Men',
+ 'Super Stylish & Trendy Combo Pack of 02 Pairs Sneakers ...',
+ 'Perfect Combo Pack of 02 Pairs Casual Sneakers Outdoor ...',
+ 'Perfect & Affordable Combo Pack of 02 Pairs Sneakers Ou...',
+ "Men's Casual sneaker shoes running shoes walking shoes ...",
+ 'STYLISH MENS BLACK SNEAKER Sneakers For Men',
+ 'Sneakers For Men',
+ '5013-Latest Collection Stylish & Trendy of casuals Snea...',
+ "Men's Casual Shoes in White Color Walking Running Gymwe...",
+ '516 Trendy Star Perfect Sneakers For Men',
+ '5011-Latest Collection Stylish & Trendy Casual Sneakers...',
+ "Casual , Partywear Sneakers Shoes For Men's And Boys Wh...",
+ 'Original Luxury Branded Black Fancy Casual Walking Part...',
+ 'Sneakers Sneakers For Men',
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ 'Super 445 Fashion Sneakers For Men',
+ 'Sneakers For Men',
+ 'Sneakers For Men',
+ "White Sneaker For Men's/Boy's Sneakers For Men",
+ 'Sneakers For Men',
+ 'Sneakers For Men']
+Price[:100]
+['₹449',
+ '₹669',
+ '₹424',
+ '₹158',
+ '₹374',
+ '₹399',
+ '₹209',
+ '₹1,449',
+ '₹599',
+ '₹544',
+ '₹499',
+ '₹449',
+ '₹449',
+ '₹317',
+ '₹159',
+ '₹435',
+ '₹209',
+ '₹159',
+ '₹249',
+ '₹610',
+ '₹449',
+ '₹348',
+ '₹399',
+ '₹489',
+ '₹399',
+ '₹449',
+ '₹424',
+ '₹670',
+ '₹349',
+ '₹549',
+ '₹534',
+ '₹328',
+ '₹209',
+ '₹566',
+ '₹449',
+ '₹239',
+ '₹394',
+ '₹269',
+ '₹394',
+ '₹1,034',
+ '₹449',
+ '₹669',
+ '₹424',
+ '₹158',
+ '₹374',
+ '₹399',
+ '₹209',
+ '₹1,449',
+ '₹599',
+ '₹544',
+ '₹499',
+ '₹449',
+ '₹449',
+ '₹317',
+ '₹159',
+ '₹435',
+ '₹209',
+ '₹159',
+ '₹249',
+ '₹610',
+ '₹449',
+ '₹348',
+ '₹399',
+ '₹489',
+ '₹399',
+ '₹449',
+ '₹424',
+ '₹670',
+ '₹349',
+ '₹549',
+ '₹534',
+ '₹328',
+ '₹209',
+ '₹566',
+ '₹449',
+ '₹239',
+ '₹394',
+ '₹269',
+ '₹394',
+ '₹1,034',
+ '₹449',
+ '₹669',
+ '₹424',
+ '₹158',
+ '₹374',
+ '₹399',
+ '₹209',
+ '₹1,449',
+ '₹599',
+ '₹544',
+ '₹499',
+ '₹449',
+ '₹449',
+ '₹317',
+ '₹159',
+ '₹435',
+ '₹209',
+ '₹159',
+ '₹249',
+ '₹610']
+Discount[:100]
+['70% off',
+ '44% off',
+ '78% off',
+ '84% off',
+ '62% off',
+ '80% off',
+ '83% off',
+ '56% off',
+ '62% off',
+ '76% off',
+ '72% off',
+ '70% off',
+ '70% off',
+ '68% off',
+ '68% off',
+ '56% off',
+ '73% off',
+ '68% off',
+ '62% off',
+ '38% off',
+ '55% off',
+ '65% off',
+ '60% off',
+ '67% off',
+ '20% off',
+ '55% off',
+ '57% off',
+ '32% off',
+ '65% off',
+ '45% off',
+ '64% off',
+ '67% off',
+ '58% off',
+ '43% off',
+ '87% off',
+ '76% off',
+ '60% off',
+ '73% off',
+ '60% off',
+ '65% off',
+ '70% off',
+ '44% off',
+ '78% off',
+ '84% off',
+ '62% off',
+ '80% off',
+ '83% off',
+ '56% off',
+ '62% off',
+ '76% off',
+ '72% off',
+ '70% off',
+ '70% off',
+ '68% off',
+ '68% off',
+ '56% off',
+ '73% off',
+ '68% off',
+ '62% off',
+ '38% off',
+ '55% off',
+ '65% off',
+ '60% off',
+ '67% off',
+ '20% off',
+ '55% off',
+ '57% off',
+ '32% off',
+ '65% off',
+ '45% off',
+ '64% off',
+ '67% off',
+ '58% off',
+ '43% off',
+ '87% off',
+ '76% off',
+ '60% off',
+ '73% off',
+ '60% off',
+ '65% off',
+ '70% off',
+ '44% off',
+ '78% off',
+ '84% off',
+ '62% off',
+ '80% off',
+ '83% off',
+ '56% off',
+ '62% off',
+ '76% off',
+ '72% off',
+ '70% off',
+ '70% off',
+ '68% off',
+ '68% off',
+ '56% off',
+ '73% off',
+ '68% off',
+ '62% off',
+ '38% off']
+#Import pandas as pd
+sneakers=pd.DataFrame({})
+sneakers['Brand_name']=B_name[:100]
+sneakers['P_price']=Price[:100]
+sneakers['Pr_desc']=P_desc[:100]
+sneakers
+Brand_name	P_price	Pr_desc
+0	Echor	₹449	Men's casual shoes sports shoes black sneaker ...
+1	HIGHLANDER	₹669	Sneakers For Men
+2	ASTEROID	₹424	Original Luxury Branded Fashionable Men's Casu...
+3	URBANBOX	₹158	Sneakers For Men
+4	Magnolia	₹374	Kwik FIT casual sneaker shoes and partywear sh...
+...	...	...	...
+95	Mr ShoesWala	₹435	Sneakers For Men
+96	Chevit	₹209	Sneakers For Men
+97	World Wear Footwear	₹159	White Sneaker For Men's/Boy's Sneakers For Men
+98	D-SNEAKERZ	₹249	Sneakers For Men
+99	RapidBox	₹610	Sneakers For Men
+100 rows × 3 columns
+
+Q9: Write a python program to scrape data for first 10 job results for Data Scientist Designation in Noida location. You have to scrape company name, No. of days ago when job was posted, Rating of the company.
+
+# Lets now import all the required libraries
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+# Lets first connect to the web driver
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.get('https://www.ambitionbox.com/')
+# Finding element for job search bar
+search_g= driver.find_element_by_xpath("//a[@class='link jobs']") 
+search_g
+<selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="482b0973-0b2c-4817-ad70-61c67ceae91c")>
+# write on search bar
+search_g.send_keys('jobs')
+search_button=driver.find_element_by_xpath("/html/body/div[1]/nav/nav/a[6]")
+search_button.click()
+# Specifying the url of the webpage to be scraped
+url="https://www.ambitionbox.com/jobs"
+# Lets open the webpage through our web driver
+driver.get(url)
+search_field_designation=driver.find_element_by_xpath("/html/body/div/div/div/div[2]/div[1]/div[1]/div/div/div/div/span/input") #job search bar
+search_field_designation
+<selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="504d1fca-23b3-4e9f-b242-0c04463e00c4")>
+search_field_designation.send_keys("Data Scientist")
+search_button=driver.find_element_by_xpath("/html/body/div/div/div/div[2]/div[1]/div[1]/div/div/div/button/span")
+search_button.click()
+url="https://www.ambitionbox.com/jobs/search?tag=Data%20Scientist"
+search_field_loaction=driver.find_element_by_xpath('/html/body/div/div/div/div[2]/div[1]/div[2]/div[1]/div/div/div/div[2]/div[1]/i') 
+search_button=driver.find_element_by_xpath('/html/body/div/div/div/div[2]/div[1]/div[2]/div[1]/div/div/div/div[2]/div[1]/i')
+search_button.click()
+select_button=driver.find_element_by_xpath("//label[@class='radio-label']")
+select_button
+<selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="1adb577d-e272-4f6e-ab1a-a1a20b1a1923")>
+job_titles=[]
+company_names=[]
+locations_list=[]
+experience_list=[]
+# So lets extract all the tags having the job-titles
+titles_tags=driver.find_elements_by_xpath("//a[@class='title noclick']")
+titles_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="ba702785-8c29-47c5-b5f9-53bff09c8cd8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="2f6eb67a-50b6-412c-9e78-14ef7d369cb7")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="536a017b-0bde-475a-a65d-a48e5519ada3")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="95efe54c-5764-4926-b9ce-1d9f24cebf12")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="d55a8ece-e9db-47ef-bb92-f7b08d03ffa0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="a77cd048-c8df-4713-88a2-8746acae0d2d")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="bcd7e23c-2dcc-4e6e-868f-4c9a2d81efd9")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="db7e7421-a543-4a53-a476-61682874cc74")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="111fa8cb-75ad-4c5c-9f13-ece685dc052b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="774daebb-163e-4d20-a358-eb2b0f4c2135")>]
+for i in titles_tags:
+    title=i.text
+    job_titles.append(title)
+job_titles[0:10]
+['Senior Data Scientist',
+ 'Data Scientist',
+ 'Senior Data Scientist',
+ 'Data Scientist with SAS',
+ 'Hiring For Data Scientist + Python/R+ Predictive Modeling',
+ 'Urgent Requirement || Data Scientist || Noida',
+ 'Director Data Science',
+ 'Data Scientist - Machine Learning (5-14 yrs)',
+ 'Data Scientist- Fresher Opening - Newgen Software Technologies',
+ 'Senior Data Scientist']
+# So lets extract all the tags having the company names
+companies_tags=driver.find_elements_by_xpath("//p[@class='company body-medium']")
+companies_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="f7483bb6-8b32-41a5-9104-629fdd8a7be1")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="f6dad6bb-3eb1-4279-b320-25ff7b37e0c0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="2cb6fb51-fca3-43fe-91f6-c22a6dab9292")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="ba2631eb-63cc-4c77-943a-7f5535972d82")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="b720d7ae-9d15-4ebe-9c4e-4717a7061852")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="f27c67e1-073b-405f-aa45-46f853e8d0dd")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="af0db02e-9389-45ed-857a-e6095cf54095")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="0545dc5f-35ae-4a68-b123-45e1dd01b797")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="f692a160-0e03-4861-8383-d6e12e99ce5a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="39a29897-2d4a-47fb-a28c-5e53f058fb2f")>]
+for i in companies_tags:
+    company_name=i.text
+    company_names.append(company_name)
+company_names[0:10]
+['GENPACT India Private Limited',
+ 'Optum Global Solutions (India) Private Limited',
+ 'Tech Mahindra Ltd',
+ 'GENPACT India Private Limited',
+ 'HCL Technologies',
+ 'Optum Global Solutions (India) Private Limited',
+ 'Zyoin',
+ 'Newgen Software Technologies Ltd.',
+ 'Pitney Bowes India Pvt Ltd',
+ 'JK Technosoft Ltd']
+# so lets extract all the tags having the experience required data
+
+experience_tags=driver.find_elements_by_xpath("//p[@class='body-small-l']")
+experience_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="96ed7aab-9958-460b-98fc-5039ac112f81")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="fdc8bc67-0da7-45f0-b19a-d91d71c225f4")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="d38f17e4-62fa-4bb7-af93-6787345a99e1")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="dd580c92-42d2-4a2c-8ce4-0467875b4ff0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="a6b4dec8-1031-42cc-9bd9-1e21636c758f")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="1f07818f-2d36-4045-af28-41625c5c6b36")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="357b0809-1d19-4b0b-aed6-f747299841ec")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="0930cc3d-3c07-4a80-b001-a7f796581934")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="5e19d002-3c1b-415b-b235-1b1802ade5df")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="3942e36755e93b8d457e7c5ab9a90041", element="35f5c1e8-2980-4014-8319-bbecc8633023")>]
+for i in experience_tags:
+    experience=i.text
+    experience_list.append(experience)
+experience_list[0:10]
+['7-12 years',
+ 'Not Disclosed',
+ 'Bengaluru/Bangalore, Hyderabad/Secunderabad, Gurgaon/Gurugram + 1 more',
+ '7-12 Yrs',
+ 'Not Disclosed',
+ 'Bengaluru/Bangalore, Hyderabad/Secunderabad, Gurgaon/Gurugram +1 more',
+ 'deep learning, python, machine learning',
+ '2-7 Yrs',
+ 'Not Disclosed',
+ 'Noida']
+#Import pandas as pd
+jobs=pd.DataFrame({})
+jobs['title']=job_titles[:10]
+jobs['company']=company_names[:10]
+jobs['experience_required']=experience_list[:10]
+jobs
+title	company	experience_required
+0	Senior Data Scientist	GENPACT India Private Limited	7-12 years
+1	Data Scientist	Optum Global Solutions (India) Private Limited	Not Disclosed
+2	Senior Data Scientist	Tech Mahindra Ltd	Bengaluru/Bangalore, Hyderabad/Secunderabad, G...
+3	Data Scientist with SAS	GENPACT India Private Limited	7-12 Yrs
+4	Hiring For Data Scientist + Python/R+ Predicti...	HCL Technologies	Not Disclosed
+5	Urgent Requirement || Data Scientist || Noida	Optum Global Solutions (India) Private Limited	Bengaluru/Bangalore, Hyderabad/Secunderabad, G...
+6	Director Data Science	Zyoin	deep learning, python, machine learning
+7	Data Scientist - Machine Learning (5-14 yrs)	Newgen Software Technologies Ltd.	2-7 Yrs
+8	Data Scientist- Fresher Opening - Newgen Softw...	Pitney Bowes India Pvt Ltd	Not Disclosed
+9	Senior Data Scientist	JK Technosoft Ltd	Noida
+Write a python program to scrape the salary data for Data Scientist designation.
+You have to scrape Company name, Number of salaries, Average salary, Minsalary, Max Salary.
+
+import selenium
+import pandas as pd
+from selenium import webdriver
+import warnings
+warnings.filterwarnings("ignore")
+import time
+driver = webdriver.Chrome(r"C:\Users\Administrator\Downloads\chromedriver_win32\chromedriver.exe")
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+driver.get('https://www.ambitionbox.com/')
+search_g= driver.find_element_by_xpath("//a[@class='link salaries']") 
+search_g
+<selenium.webdriver.remote.webelement.WebElement (session="cb397737de50ae7417b1abb7bafd83e7", element="22f6eb4b-d486-4c23-8fbf-d5b8f5942513")>
+search_g.send_keys('Salaries')
+search_g.click()
+search_job_profile=driver.find_element_by_xpath('/html/body/div/div/div/main/section[1]/div[2]/div[1]/span/input')
+search_job_profile
+<selenium.webdriver.remote.webelement.WebElement (session="cb397737de50ae7417b1abb7bafd83e7", element="6c5b47ff-f482-444f-823e-5cbf6e394dc8")>
+search_job_profile.send_keys("Data Scientist")
+search_job_profile.click()
+select_button=driver.find_element_by_xpath("//p[@class='tt_text']")
+select_button
+<selenium.webdriver.remote.webelement.WebElement (session="cb397737de50ae7417b1abb7bafd83e7", element="18557e72-697e-437d-9ab5-f1aa21c5238e")>
+search_job_profile.click()
+select_button=driver.find_element_by_xpath("//div[@class='suggestion_wrap tt-suggestion tt-selectable']")
+select_button
+<selenium.webdriver.remote.webelement.WebElement (session="cb397737de50ae7417b1abb7bafd83e7", element="a3484414-be8c-4f6e-906d-69c9e43eb86d")>
+search_job_profile.click()
+company_name=[]
+total_salary_record=[]
+average_salary=[]
+minimum_salary=[]
+maximum_salary=[]
+experience_required=[]
+companies_tags=driver.find_elements_by_xpath("//div[@class='name']")
+companies_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="f8af5910-c177-4710-8315-bef05405270d")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="693b5335-6aba-4693-9fa8-1a0fc6451c07")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="a24dbac7-d610-4c67-b8aa-8ae1e0892540")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="b37e3332-9e7b-4c9e-8629-cf1e9254b224")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="cd46ab06-ab81-48fb-b24d-993e4ec426eb")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="25259733-6e8d-4a00-ac60-eee7cb406308")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="f2525b0c-7606-4f22-a547-8f009d305a42")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="295fb39e-4772-4f0d-ad3e-4374ea7f58c0")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="9efa3362-4fdf-41a3-9b91-71d81b449401")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="893f9411-20a6-48d5-98b8-763475063219")>]
+for i in companies_tags:
+    company_names=i.text
+    company_names.append(company_name)
+company_names[0:10]
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-138-304ce9034518> in <module>
+      1 for i in companies_tags:
+      2     company_names=i.text
+----> 3     company_names.append(company_name)
+      4 company_names[0:10]
+
+AttributeError: 'str' object has no attribute 'append'
+salary_tags=driver.find_elements_by_xpath("//p[@class='averageCtc']")
+salary_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="dce390d7-eeb2-464a-b9f7-37e421e9cd73")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="29adb39a-dd17-4f16-ac9d-26cb8fd9b792")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="ae41d564-9883-499c-8ef3-f66a3bc93981")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="d75a34db-5555-4293-b8da-e537ca4ec73e")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="301fc3da-e832-433d-82c7-fb37839cbe75")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="d7b81b62-c03e-48f6-8580-09e7ede82c90")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="8376c50f-e9af-4755-8873-5ed73fba1d95")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="70321f31-a41b-4e72-96b2-43fad89282ce")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="d09f2121-8057-45cc-b7df-04ba04977b1b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="eebd3a1e-e8ba-422b-a58a-b5882f373b7f")>]
+for i in salary_tags :
+    salary=i.text
+    total_salary_record.append(salary)
+total_salary_record[0:10]
+['₹ 29.7L',
+ '₹ 20.5L',
+ '₹ 18.9L',
+ '₹ 15.9L',
+ '₹ 15.2L',
+ '₹ 15.2L',
+ '₹ 14.8L',
+ '₹ 14.0L',
+ '₹ 12.7L',
+ '₹ 12.4L']
+salary_tags=driver.find_elements_by_xpath("//div[@class='value body-medium']")
+salary_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="655a82c0-76cd-438e-af51-7953b6820405")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="128e1b3d-6877-4623-a98e-510218868cdf")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="1314d8df-1c4b-43f4-bacb-4e74ffed43b8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="47d4f85c-214f-4def-83cd-948a9ea88034")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="407575e6-5366-474b-9063-df73001697d7")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="c0cafaaf-9ebc-4994-b601-634289edb47b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="2d0480e5-c2c7-499c-b158-bf46a6e3a5a6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="e29c61ac-e3b1-4625-8105-5f12657c359a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="89597b3c-49d6-4455-87c2-4163349dda0b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="cad27357-94a1-4f7d-a1d1-f3bb1afe8351")>]
+for i in salary_tags :
+    salary=i.text
+    minimum_salary.append(salary)
+minimum_salary[0:10]
+['₹ 25.0L',
+ '₹ 35.0L',
+ '₹ 15.0L',
+ '₹ 25.5L',
+ '₹ 5.6L',
+ '₹ 26.2L',
+ '₹ 9.8L',
+ '₹ 20.0L',
+ '₹ 11.0L',
+ '₹ 22.0L']
+salary_tags=driver.find_elements_by_xpath("//div[@class='value body-medium']")
+salary_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="655a82c0-76cd-438e-af51-7953b6820405")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="128e1b3d-6877-4623-a98e-510218868cdf")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="1314d8df-1c4b-43f4-bacb-4e74ffed43b8")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="47d4f85c-214f-4def-83cd-948a9ea88034")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="407575e6-5366-474b-9063-df73001697d7")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="c0cafaaf-9ebc-4994-b601-634289edb47b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="2d0480e5-c2c7-499c-b158-bf46a6e3a5a6")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="e29c61ac-e3b1-4625-8105-5f12657c359a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="89597b3c-49d6-4455-87c2-4163349dda0b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="cad27357-94a1-4f7d-a1d1-f3bb1afe8351")>]
+for i in salary_tags :
+    salary=i.text
+    maximum_salary.append(salary)
+maximum_salary[0:10]
+['₹ 25.0L',
+ '₹ 35.0L',
+ '₹ 15.0L',
+ '₹ 25.5L',
+ '₹ 5.6L',
+ '₹ 26.2L',
+ '₹ 9.8L',
+ '₹ 20.0L',
+ '₹ 11.0L',
+ '₹ 22.0L']
+experience_tags=driver.find_elements_by_xpath("//div[@class='salaries sbold-list-header']")
+experience_tags[0:10]
+[<selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="36fa9700-088b-4d8b-ac99-9fa578e35935")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="0929cee9-4128-4df8-9613-6df34b20aefd")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="5b86262b-dbd5-4aae-b9a2-9c2f36c5f1d9")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="ebb2d7da-a32b-44f5-99c7-677155160d4a")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="52912d77-7459-4d8a-b7e2-14e7daee4eaa")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="571e4295-0fec-45dc-aa89-31e0cdaa6493")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="ea34c69d-fd2e-4d47-ac86-f7ddcb274481")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="ab3de349-6ca3-4d44-b8ee-a66e6982ed8b")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="7f05dfff-50ff-4341-9da4-0cd7d0799a24")>,
+ <selenium.webdriver.remote.webelement.WebElement (session="a5770c2cac9baf3156e7647706e011da", element="16bfdfed-9929-44d9-a32a-dec55d9e007e")>]
+for i in experience_tags:
+    experience=i.text
+    experience_required.append(experience)
+experience_required[0:10]
+['Data Scientist\n . \n3 yrs exp',
+ 'Data Scientist\n . \n3-4 yrs exp',
+ 'Data Scientist\n . \n4 yrs exp',
+ 'Data Scientist\n . \n2 yrs exp',
+ 'Data Scientist\n . \n3-4 yrs exp',
+ 'Data Scientist\n . \n2-4 yrs exp',
+ 'Data Scientist\n . \n2-4 yrs exp',
+ 'Data Scientist\n . \n2-4 yrs exp',
+ 'Data Scientist\n . \n4 yrs exp',
+ 'Data Scientist\n . \n4 yrs exp']
+jobs=pd.DataFrame({})
+jobs['Total Salary Record']=total_salary_record[:10]
+jobs['Minimum Salary']=minimum_salary[:10]
+jobs['Maximum Salary']=maximum_salary[:10]
+jobs['Experience']=experience_required[:10]
+jobs
+Total Salary Record	Minimum Salary	Maximum Salary	Experience
+0	₹ 29.7L	₹ 25.0L	₹ 25.0L	Data Scientist\n . \n3 yrs exp
+1	₹ 20.5L	₹ 35.0L	₹ 35.0L	Data Scientist\n . \n3-4 yrs exp
+2	₹ 18.9L	₹ 15.0L	₹ 15.0L	Data Scientist\n . \n4 yrs exp
+3	₹ 15.9L	₹ 25.5L	₹ 25.5L	Data Scientist\n . \n2 yrs exp
+4	₹ 15.2L	₹ 5.6L	₹ 5.6L	Data Scientist\n . \n3-4 yrs exp
+5	₹ 15.2L	₹ 26.2L	₹ 26.2L	Data Scientist\n . \n2-4 yrs exp
+6	₹ 14.8L	₹ 9.8L	₹ 9.8L	Data Scientist\n . \n2-4 yrs exp
+7	₹ 14.0L	₹ 20.0L	₹ 20.0L	Data Scientist\n . \n2-4 yrs exp
+8	₹ 12.7L	₹ 11.0L	₹ 11.0L	Data Scientist\n . \n4 yrs exp
+9	₹ 12.4L	₹ 22.0L	₹ 22.0L	Data Scientist\n . \n4 yrs exp
+driver.close()
