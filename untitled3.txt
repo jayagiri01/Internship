@@ -1,0 +1,1362 @@
+1. Write a python program which searches all the product under a particular product vertical from www.amazon.in. The product verticals to be searched will be taken as input from user. For e.g. If user input is ‘guitar’. Then search for guitars.
+#importing necessary libraries
+import selenium
+import pandas as pd
+from bs4 import BeautifulSoup
+import time
+
+#Importing requests
+import requests
+
+# importing regex
+import re
+
+# Importing selenium webdriver
+from selenium import webdriver
+
+# Importing required Exceptions
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+#Activating the chrome browser
+driver = webdriver.Chrome("chromedriver.exe")
+#Getting amazon page
+driver.get('https://www.amazon.in/')
+#Giving input
+search_item= input('Enter the product that has to be searched : ')
+Enter the product that has to be searched : Laptop
+#Scraping search bar Xpath and clicking on search icon
+search_bar = driver.find_element_by_xpath('/html/body/div[1]/header/div/div[1]/div[2]/div/form/div[2]/div[1]/input')   
+search_bar.clear()                                               
+search_bar.send_keys(search_item)
+search_button = driver.find_element_by_xpath('/html/body/div[1]/header/div/div[1]/div[2]/div/form/div[3]/div/span/input')
+search_button.click()   
+2. In the above question, now scrape the following details of each product listed in first 3 pages of your search results and save it in a data frame and csv. In case if any product vertical has less than 3 pages in search results then scrape all the products available under that product vertical. Details to be scraped are: "Brand Name", "Name of the Product", "Rating", "No. of Ratings", "Price", "Return/Exchange", "Expected Delivery", "Availability", "Other Details" and “Product URL”. In case, if any of the details are missing for any of the product then replace it by “-“.
+#collecting all the Product URLS
+urls = []
+for i in range(0,3):
+    Page_urls=driver.find_elements_by_xpath("//a[@class='a-link-normal s-no-outline']")#collecting urls of all the laptop
+    for i in Page_urls:
+        urls.append(i.get_attribute('href'))
+        
+    #next button 
+    nxt_btn=driver.find_element_by_xpath("//a[@class='s-pagination-item s-pagination-next s-pagination-button s-pagination-separator']") 
+    url=nxt_btn.get_attribute('href')
+    driver.get(url)
+    time.sleep(2)
+#Making empty lists and scraping the required spots
+Product_name = []
+Brand_name= []
+Ratings = []
+No_Ratings = []
+Price = []
+Return = []
+Expected_Delivery = []
+Availability = []
+Other_Details = []
+
+#Start with for loop
+for i in urls:
+    driver.get(i)
+    time.sleep(2)
+    
+    
+    #Scraping data for product name
+    try:
+        prod=driver.find_element_by_xpath("//span[@id='productTitle']")
+        Product_name.append(prod.text)
+    except NoSuchElementException as e:
+        Product_name.append("-")
+        
+        
+    #Scraping data for brand name
+    try:
+        brand=driver.find_element_by_xpath("//div[@id='bylineInfo_feature_div']/div/a")
+        Brand_name.append(brand.text)
+    except NoSuchElementException as e:
+        Brand_name.append("-")
+        
+        
+     #Scraping data for Ratings
+    try:
+        rat=driver.find_element_by_xpath("//span[@id='acrPopover']")
+        Ratings.append(rat.get_attribute("title"))   
+    except NoSuchElementException as e:
+        Ratings.append("-")
+        
+        
+    #Scraping data for No of Ratings
+    try:
+        no_rat=driver.find_element_by_xpath("//a[@id='acrCustomerReviewLink']/span")
+        No_Ratings.append(no_rat.text)
+    except NoSuchElementException as e:
+        No_Ratings.append("-")
+        
+        
+    #Scraping data for Price
+    try:
+        pri=driver.find_element_by_xpath("//span[@id='priceblock_ourprice']")
+        Price.append(pri.text)
+    except NoSuchElementException as e:
+        Price.append("-")
+        
+        
+    #Scraping data for Return/Exchange
+    try:
+        ret=driver.find_element_by_xpath("//div[@data-name='RETURNS_POLICY']/span/div[2]/a")
+        Return.append(ret.text)
+    except NoSuchElementException as e:
+        Return.append("-")
+        
+     
+    #Scraping data for Expected_Delivary
+    try:
+        delivary=driver.find_element_by_xpath("//div[@id='ddmDeliveryMessage']/b")
+        Expected_Delivery.append(delivary.text)
+    except NoSuchElementException as e:
+        Expected_Delivery.append("-")
+        
+        
+    #Scraping data for Availability
+    try:
+        avai=driver.find_element_by_xpath("//div[@id='availability']/span")
+        Availability.append(avai.text)
+    except NoSuchElementException as e:
+        Availability.append("-")
+        
+        
+    #Scraping data for Other_Details
+    try:
+        details=driver.find_element_by_xpath("//ul[@class='a-unordered-list a-vertical a-spacing-mini']")
+        Other_Details.append(details.text)
+    except NoSuchElementException as e:
+        Other_Details.append("-")
+        
+        
+#DATA FRAMEING
+Laptop=pd.DataFrame({})
+Laptop['Name'] = Product_name
+Laptop['Brand'] = Brand_name
+Laptop['Rating'] = Ratings
+Laptop['No of Ratings'] = No_Ratings
+Laptop['Price'] = Price
+Laptop['Return'] = Return
+Laptop['Expected_Delivery'] = Expected_Delivery
+Laptop['Availability'] = Availability
+Laptop['Other_Details'] = Other_Details
+Laptop['Urls'] = urls
+#Printing the dataframe
+Laptop
+Name	Brand	Rating	No of Ratings	Price	Return	Expected_Delivery	Availability	Other_Details	Urls
+0	ASUS VivoBook 14 (2020) Intel Core i3-1005G1 1...	Visit the ASUS Store	3.6 out of 5 stars	379 ratings	₹35,990.00	7 Days Replacement	Sunday, Aug 22	In stock.	Processor: 10th Gen Intel Core i3-1005G1 Proce...	https://www.amazon.in/gp/slredirect/picassoRed...
+1	LG Gram 16 Ultra-Light 11th Gen Core i5,8 GB R...	Visit the LG Store	4.6 out of 5 stars	21 ratings	₹1,00,567.00	7 Days Replacement	Saturday, Aug 21	In stock.	Processor & OS: Intel 11th Gen Corei5-1135G7 (...	https://www.amazon.in/gp/slredirect/picassoRed...
+2	HP 15 AMD Athlon 15.6" (39.62cms) HD Laptop (S...	Visit the HP Store	3.5 out of 5 stars	311 ratings	₹29,592.00	7 Days Replacement	Friday, Aug 20	In stock.	Processor: AMD Athlon Silver 3050U (2.3 GHz ba...	https://www.amazon.in/HP-Athlon-15-6-inch-Silv...
+3	HP Chromebook x360 Intel Celeron N4020 Process...	Visit the HP Store	4.1 out of 5 stars	240 ratings	₹29,990.00	7 Days Replacement	Sep 28 - 30	In stock on September 26, 2021.	Graphics: Intel UHD Graphics 600\nOperating Sy...	https://www.amazon.in/HP-Chromebook-12b-ca0010...
+4	HP 15 Intel Pentium Gold 6405U Processor Entry...	Visit the HP Store	3.4 out of 5 stars	707 ratings	-	7 Days Replacement	-		Design & Battery: Thin and light design | Lapt...	https://www.amazon.in/HP-Pentium-Processor-15-...
+...	...	...	...	...	...	...	...	...	...	...
+61	HP Pavilion (2021) 11th Gen Core i5 Laptop, 16...	Visit the HP Store	4.4 out of 5 stars	194 ratings	-	7 Days Replacement	Friday, Aug 20	In stock.	Processor: 11th Gen Intel Core i5-1135G7 (up t...	https://www.amazon.in/HP-Pavilion-Graphics-39-...
+62	HP 14 11th Gen Intel Core i5 Processor 14-inch...	Visit the HP Store	4.2 out of 5 stars	396 ratings	₹58,990.00	7 Days Replacement	Friday, Aug 20	In stock.	Processor: 11th Gen Intel Core i5-1135G7 (up t...	https://www.amazon.in/HP-Processor-14-inch-Win...
+63	Lenovo IdeaPad Slim 3 10th Gen Intel Core i3 1...	Visit the Lenovo Store	4.0 out of 5 stars	403 ratings	-	7 Days Replacement	Friday, Aug 20	In stock.	Processor: 10th Gen Intel Core i3-10110U | Spe...	https://www.amazon.in/Lenovo-Graphics-Warranty...
+64	HP Pavilion (2021) Thin & Light 11th Gen Core ...	Visit the HP Store	4.3 out of 5 stars	808 ratings	₹66,990.00	7 Days Replacement	Friday, Aug 20	In stock.	Processor: 11th Gen Intel Core i5-1135G7 (up t...	https://www.amazon.in/gp/slredirect/picassoRed...
+65	Lenovo IdeaPad Slim 3 2021 11th Gen Intel Core...	Visit the Lenovo Store	4.2 out of 5 stars	435 ratings	-	7 Days Replacement	Saturday, Aug 21	In stock.	Processor: 11th Gen Intel Core i3-1115G4 | Spe...	https://www.amazon.in/gp/slredirect/picassoRed...
+66 rows × 10 columns
+
+#saving data to csv
+Laptop.to_csv('Amazon_{}.csv'.format(search_item))
+3. Write a python program to access the search bar and search button on images.google.com and scrape 100 images each for keywords ‘fruits’, ‘cars’ and ‘Machine Learning’.
+#Activating the chrome browser with specified url
+driver = webdriver.Chrome("chromedriver.exe")
+# getting images.google.com
+url = "https://images.google.com/"
+#Creating empty list and giving search items as list and creating loop
+urls = []    
+data = []
+search_item = ["fruits", "cars", "Machine Learning"]
+for item in search_item:
+    driver.get(url)  
+    time.sleep(5)
+    search_bar = driver.find_element_by_tag_name("input") #Xpath for search bar
+    
+    search_bar.send_keys(str(item))      #sending key word for search item
+    
+    search_button =driver.find_element_by_xpath("//button[@class='Tg7LZd']").click() #Clicking on search button
+    
+    # scrolling the web page to get more images
+    for _ in range(500):
+        driver.execute_script("window.scrollBy(0,100)")
+        
+        imgs = driver.find_elements_by_xpath("//img[@class='rg_i Q4LuWd']")
+    img_url = []
+    for image in imgs:
+        source = image.get_attribute('src')
+        if source is not None:
+                if(source[0:4] == 'http'):
+                    img_url.append(source)
+    for i in img_url[:100]:
+        urls.append(i)
+                    
+for i in range(len(urls)):
+    if i >= 300:
+        break
+    print("Downloading {0} of {1} images" .format(i, 300))
+    response = requests.get(urls[i])
+
+    file = open(r"G:\flipnwork\GoogleImages"+str(i)+".jpg", "wb")
+
+    file.write(response.content)
+Downloading 0 of 300 images
+Downloading 1 of 300 images
+Downloading 2 of 300 images
+Downloading 3 of 300 images
+Downloading 4 of 300 images
+Downloading 5 of 300 images
+Downloading 6 of 300 images
+Downloading 7 of 300 images
+Downloading 8 of 300 images
+Downloading 9 of 300 images
+Downloading 10 of 300 images
+Downloading 11 of 300 images
+Downloading 12 of 300 images
+Downloading 13 of 300 images
+Downloading 14 of 300 images
+Downloading 15 of 300 images
+Downloading 16 of 300 images
+Downloading 17 of 300 images
+Downloading 18 of 300 images
+Downloading 19 of 300 images
+Downloading 20 of 300 images
+Downloading 21 of 300 images
+Downloading 22 of 300 images
+Downloading 23 of 300 images
+Downloading 24 of 300 images
+Downloading 25 of 300 images
+Downloading 26 of 300 images
+Downloading 27 of 300 images
+Downloading 28 of 300 images
+Downloading 29 of 300 images
+Downloading 30 of 300 images
+Downloading 31 of 300 images
+Downloading 32 of 300 images
+Downloading 33 of 300 images
+Downloading 34 of 300 images
+Downloading 35 of 300 images
+Downloading 36 of 300 images
+Downloading 37 of 300 images
+Downloading 38 of 300 images
+Downloading 39 of 300 images
+Downloading 40 of 300 images
+Downloading 41 of 300 images
+Downloading 42 of 300 images
+Downloading 43 of 300 images
+Downloading 44 of 300 images
+Downloading 45 of 300 images
+Downloading 46 of 300 images
+Downloading 47 of 300 images
+Downloading 48 of 300 images
+Downloading 49 of 300 images
+Downloading 50 of 300 images
+Downloading 51 of 300 images
+Downloading 52 of 300 images
+Downloading 53 of 300 images
+Downloading 54 of 300 images
+Downloading 55 of 300 images
+Downloading 56 of 300 images
+Downloading 57 of 300 images
+Downloading 58 of 300 images
+Downloading 59 of 300 images
+Downloading 60 of 300 images
+Downloading 61 of 300 images
+Downloading 62 of 300 images
+Downloading 63 of 300 images
+Downloading 64 of 300 images
+Downloading 65 of 300 images
+Downloading 66 of 300 images
+Downloading 67 of 300 images
+Downloading 68 of 300 images
+Downloading 69 of 300 images
+Downloading 70 of 300 images
+Downloading 71 of 300 images
+Downloading 72 of 300 images
+Downloading 73 of 300 images
+Downloading 74 of 300 images
+Downloading 75 of 300 images
+Downloading 76 of 300 images
+Downloading 77 of 300 images
+Downloading 78 of 300 images
+Downloading 79 of 300 images
+Downloading 80 of 300 images
+Downloading 81 of 300 images
+Downloading 82 of 300 images
+Downloading 83 of 300 images
+Downloading 84 of 300 images
+Downloading 85 of 300 images
+Downloading 86 of 300 images
+Downloading 87 of 300 images
+Downloading 88 of 300 images
+Downloading 89 of 300 images
+Downloading 90 of 300 images
+Downloading 91 of 300 images
+Downloading 92 of 300 images
+Downloading 93 of 300 images
+Downloading 94 of 300 images
+Downloading 95 of 300 images
+Downloading 96 of 300 images
+Downloading 97 of 300 images
+Downloading 98 of 300 images
+Downloading 99 of 300 images
+Downloading 100 of 300 images
+Downloading 101 of 300 images
+Downloading 102 of 300 images
+Downloading 103 of 300 images
+Downloading 104 of 300 images
+Downloading 105 of 300 images
+Downloading 106 of 300 images
+Downloading 107 of 300 images
+Downloading 108 of 300 images
+Downloading 109 of 300 images
+Downloading 110 of 300 images
+Downloading 111 of 300 images
+Downloading 112 of 300 images
+Downloading 113 of 300 images
+Downloading 114 of 300 images
+Downloading 115 of 300 images
+Downloading 116 of 300 images
+Downloading 117 of 300 images
+Downloading 118 of 300 images
+Downloading 119 of 300 images
+Downloading 120 of 300 images
+Downloading 121 of 300 images
+Downloading 122 of 300 images
+Downloading 123 of 300 images
+Downloading 124 of 300 images
+Downloading 125 of 300 images
+Downloading 126 of 300 images
+Downloading 127 of 300 images
+Downloading 128 of 300 images
+Downloading 129 of 300 images
+Downloading 130 of 300 images
+Downloading 131 of 300 images
+Downloading 132 of 300 images
+Downloading 133 of 300 images
+Downloading 134 of 300 images
+Downloading 135 of 300 images
+Downloading 136 of 300 images
+Downloading 137 of 300 images
+Downloading 138 of 300 images
+Downloading 139 of 300 images
+Downloading 140 of 300 images
+Downloading 141 of 300 images
+Downloading 142 of 300 images
+Downloading 143 of 300 images
+Downloading 144 of 300 images
+Downloading 145 of 300 images
+Downloading 146 of 300 images
+Downloading 147 of 300 images
+Downloading 148 of 300 images
+Downloading 149 of 300 images
+Downloading 150 of 300 images
+Downloading 151 of 300 images
+Downloading 152 of 300 images
+Downloading 153 of 300 images
+Downloading 154 of 300 images
+Downloading 155 of 300 images
+Downloading 156 of 300 images
+Downloading 157 of 300 images
+Downloading 158 of 300 images
+Downloading 159 of 300 images
+Downloading 160 of 300 images
+Downloading 161 of 300 images
+Downloading 162 of 300 images
+Downloading 163 of 300 images
+Downloading 164 of 300 images
+Downloading 165 of 300 images
+Downloading 166 of 300 images
+Downloading 167 of 300 images
+Downloading 168 of 300 images
+Downloading 169 of 300 images
+Downloading 170 of 300 images
+Downloading 171 of 300 images
+Downloading 172 of 300 images
+Downloading 173 of 300 images
+Downloading 174 of 300 images
+Downloading 175 of 300 images
+Downloading 176 of 300 images
+Downloading 177 of 300 images
+Downloading 178 of 300 images
+Downloading 179 of 300 images
+Downloading 180 of 300 images
+Downloading 181 of 300 images
+Downloading 182 of 300 images
+Downloading 183 of 300 images
+Downloading 184 of 300 images
+Downloading 185 of 300 images
+Downloading 186 of 300 images
+Downloading 187 of 300 images
+Downloading 188 of 300 images
+Downloading 189 of 300 images
+Downloading 190 of 300 images
+Downloading 191 of 300 images
+Downloading 192 of 300 images
+Downloading 193 of 300 images
+Downloading 194 of 300 images
+Downloading 195 of 300 images
+Downloading 196 of 300 images
+Downloading 197 of 300 images
+Downloading 198 of 300 images
+Downloading 199 of 300 images
+Downloading 200 of 300 images
+Downloading 201 of 300 images
+Downloading 202 of 300 images
+Downloading 203 of 300 images
+Downloading 204 of 300 images
+Downloading 205 of 300 images
+Downloading 206 of 300 images
+Downloading 207 of 300 images
+Downloading 208 of 300 images
+Downloading 209 of 300 images
+Downloading 210 of 300 images
+Downloading 211 of 300 images
+Downloading 212 of 300 images
+Downloading 213 of 300 images
+Downloading 214 of 300 images
+Downloading 215 of 300 images
+Downloading 216 of 300 images
+Downloading 217 of 300 images
+Downloading 218 of 300 images
+Downloading 219 of 300 images
+Downloading 220 of 300 images
+Downloading 221 of 300 images
+Downloading 222 of 300 images
+Downloading 223 of 300 images
+Downloading 224 of 300 images
+Downloading 225 of 300 images
+Downloading 226 of 300 images
+Downloading 227 of 300 images
+Downloading 228 of 300 images
+Downloading 229 of 300 images
+Downloading 230 of 300 images
+Downloading 231 of 300 images
+Downloading 232 of 300 images
+Downloading 233 of 300 images
+Downloading 234 of 300 images
+Downloading 235 of 300 images
+Downloading 236 of 300 images
+Downloading 237 of 300 images
+Downloading 238 of 300 images
+Downloading 239 of 300 images
+Downloading 240 of 300 images
+Downloading 241 of 300 images
+Downloading 242 of 300 images
+Downloading 243 of 300 images
+Downloading 244 of 300 images
+Downloading 245 of 300 images
+Downloading 246 of 300 images
+Downloading 247 of 300 images
+Downloading 248 of 300 images
+Downloading 249 of 300 images
+Downloading 250 of 300 images
+Downloading 251 of 300 images
+Downloading 252 of 300 images
+Downloading 253 of 300 images
+Downloading 254 of 300 images
+Downloading 255 of 300 images
+Downloading 256 of 300 images
+Downloading 257 of 300 images
+Downloading 258 of 300 images
+Downloading 259 of 300 images
+Downloading 260 of 300 images
+Downloading 261 of 300 images
+Downloading 262 of 300 images
+Downloading 263 of 300 images
+Downloading 264 of 300 images
+Downloading 265 of 300 images
+Downloading 266 of 300 images
+Downloading 267 of 300 images
+Downloading 268 of 300 images
+Downloading 269 of 300 images
+Downloading 270 of 300 images
+Downloading 271 of 300 images
+Downloading 272 of 300 images
+Downloading 273 of 300 images
+Downloading 274 of 300 images
+Downloading 275 of 300 images
+Downloading 276 of 300 images
+Downloading 277 of 300 images
+Downloading 278 of 300 images
+Downloading 279 of 300 images
+Downloading 280 of 300 images
+Downloading 281 of 300 images
+Downloading 282 of 300 images
+Downloading 283 of 300 images
+Downloading 284 of 300 images
+Downloading 285 of 300 images
+Downloading 286 of 300 images
+Downloading 287 of 300 images
+Downloading 288 of 300 images
+Downloading 289 of 300 images
+Downloading 290 of 300 images
+Downloading 291 of 300 images
+Downloading 292 of 300 images
+Downloading 293 of 300 images
+Downloading 294 of 300 images
+Downloading 295 of 300 images
+Downloading 296 of 300 images
+Downloading 297 of 300 images
+Downloading 298 of 300 images
+Downloading 299 of 300 images
+I have scraped all the images from google using selenium.
+
+4. Write a python program to search for a smartphone(e.g.: Oneplus Nord, pixel 4A, etc.) on www.flipkart.com and scrape following details for all the search results displayed on 1st page. Details to be scraped: “Brand Name”, “Smartphone name”, “Colour”, “RAM”, “Storage(ROM)”, “Primary Camera”, “Secondary Camera”, “Display Size”, “Display Resolution”, “Processor”, “Processor Cores”, “Battery Capacity”, “Price”, “Product URL”. Incase if any of the details is missing then replace it by “- “. Save your results in a dataframe and CSV.
+# Activating the chrome browser
+item = input(" Enter the name of Smartphone that has to be searched : ")
+driver = webdriver.Chrome("chromedriver.exe") 
+
+#get the web page with given url
+url = "https://www.flipkart.com/"
+driver.get(url)
+time.sleep(3)
+ Enter the name of Smartphone that has to be searched : Pixel
+#Clicking on login close icon
+login_X_btn = driver.find_element_by_xpath("//div[@class='_2QfC02']//button").click()
+#giving input key word to search bar
+serch_bar = driver.find_element_by_xpath("//div[@class='_3OO5Xc']//input")
+serch_bar.send_keys(item)
+
+srch_btn = driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div[1]/div[2]/div[2]/form/div/button")
+srch_btn.click()
+time.sleep(5)
+# Fetching urls of phones coming on 1st page
+page1_urls = []
+urls = driver.find_elements_by_xpath('//a[@class="_1fQZEK"]')
+for url in urls:
+    page1_urls.append(url.get_attribute("href"))
+len(page1_urls)
+24
+Smartphones = {}
+Smartphones["Brand"] = []
+Smartphones["Phone name"] = []
+Smartphones["Colour"] = []
+Smartphones["RAM"] = []
+Smartphones["Storage(ROM)"] = []
+Smartphones["Primary Camera"] = []
+Smartphones["Secondary Camera"] = []
+Smartphones["Display Size"] = []
+Smartphones["Display Resolution"] = []
+Smartphones["Processor"] = []
+Smartphones["Processor Cores"] = []
+Smartphones["Battery Capacity"] = []
+Smartphones["Price"] = []
+Smartphones["URL"] = []
+# Scraping data from each url of page 1
+for url in page1_urls:
+    driver.get(url)                                                        
+    print("Scraping URL = ", url)
+    Smartphones['URL'].append(url)                                                          
+    time.sleep(2)
+    
+    
+    #Clicking on read more button
+    try:
+        read_more = driver.find_element_by_xpath('//button[@class="_2KpZ6l _1FH0tX"]')     
+        read_more.click()
+    except NoSuchElementException:
+        print("Exception occured while moving to next page")
+    
+    
+    #Scraping brand name of phone data
+    try:
+        brand_tags = driver.find_element_by_xpath('//span[@class="B_NuCI"]')      
+        Smartphones["Brand"].append(brand_tags.text.split()[0])
+    except NoSuchElementException:
+        Smartphones['Brand'].append('-')
+    
+    
+    #Scraping phone name data
+    try:
+        name_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][1]/table/tbody/tr[3]/td[2]/ul/li')     
+        Smartphones['Phone name'].append(name_tags.text)
+    except NoSuchElementException:
+        Smartphones['Phone name'].append('-')
+    
+    
+    #Scraping phone color data
+    try:
+        color_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][1]/table/tbody/tr[4]/td[2]/ul/li')      
+        Smartphones['Colour'].append(color_tags.text)
+    except NoSuchElementException:
+        Smartphones['Colour'].append('-')
+     
+    
+    #Scraping RAM data
+    try:
+        ram_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][4]/table[1]/tbody/tr[2]/td[2]/ul/li')                
+        Smartphones['RAM'].append(ram_tags.text)
+    except NoSuchElementException:
+        Smartphones['RAM'].append('-')
+    
+    
+    #Scraping ROM data
+    try:
+        rom_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][4]/table[1]/tbody/tr[1]/td[2]/ul/li')        
+        Smartphones['Storage(ROM)'].append(rom_tags.text)
+    except NoSuchElementException:
+        Smartphones['Storage(ROM)'].append('-')
+        
+        
+    #Scraping Primary camera data
+    try:                                                                                    
+        pri_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][5]/table[1]/tbody/tr[2]/td[2]/ul/li')
+        Smartphones['Primary Camera'].append(pri_tags.text)
+    except NoSuchElementException:
+        Smartphones['Primary Camera'].append('-')
+        
+        
+    #Scraping secondary camera data
+    try:                                                                                    
+        sec_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][5]/table[1]/tbody/tr[6]/td[1]')
+        if sec_tags != "Secondary Camera" : 
+            if driver.find_element_by_xpath('//div[@class="_3k-BhJ"][5]/table[1]/tbody/tr[5]/td[1]').text == "Secondary Camera":
+                sec_cam = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][5]/table[1]/tbody/tr[5]/td[2]/ul/li')
+            else :
+                raise NoSuchElementException
+        else :
+            sec_cam = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][5]/table[1]/tbody/tr[6]/td[2]/ul/li')
+        Smartphones['Secondary Camera'].append(sec_cam.text)
+    except NoSuchElementException:
+        Smartphones['Secondary Camera'].append('-')
+        
+        
+    #Scraping Display size data 
+    try:
+        disp_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][2]/div')
+        if disp_tags.text != "Display Features" : raise NoSuchElementException
+        disp_size = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][2]/table[1]/tbody/tr[1]/td[2]/ul/li')  
+        Smartphones['Display Size'].append(disp_size.text)
+    except NoSuchElementException:
+        Smartphones['Display Size'].append('-')
+    
+    
+    #Scraping display resolution data
+    try:
+        dires_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][2]/div')
+        if dires_tags.text != "Display Features" : raise NoSuchElementException
+        disp_reso = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][2]/table[1]/tbody/tr[2]/td[2]/ul/li')    
+        Smartphones['Display Resolution'].append(disp_reso.text)
+    except NoSuchElementException:
+        Smartphones['Display Resolution'].append('-')
+    
+    
+    
+    #Scraping Processor data
+    try:
+        pro_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][3]/table[1]/tbody/tr[2]/td[1]')
+        if pro_tags.text != "Processor Type" : raise NoSuchElementException
+        processor = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][3]/table[1]/tbody/tr[2]/td[2]/ul/li')   
+        Smartphones['Processor'].append(processor.text)
+    except NoSuchElementException:
+        Smartphones['Processor'].append('-')
+        
+    
+    
+    #Scraping Processor core data    
+    try:                                                                                     
+        core_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][3]/table[1]/tbody/tr[3]/td[1]')
+        if core_tags.text != "Processor Core" :
+            core_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][3]/table[1]/tbody/tr[2]/td[1]')
+            if core_tags.text != "Processor Core" : 
+                raise NoSuchElementException
+            else :
+                cores = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][3]/table[1]/tbody/tr[2]/td[2]/ul/li')
+        else :
+            cores = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][3]/table[1]/tbody/tr[3]/td[2]/ul/li')
+        Smartphones['Processor Cores'].append(cores.text)
+    except NoSuchElementException:
+        Smartphones['Processor Cores'].append('-')
+    
+    
+    
+    #Scraping battery capacity data
+    try:
+        if driver.find_element_by_xpath('//div[@class="_3k-BhJ"][10]/div').text != "Battery & Power Features" :
+            if driver.find_element_by_xpath('//div[@class="_3k-BhJ"][9]/div').text == "Battery & Power Features" :
+                bat_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][9]/table/tbody/tr/td[1]')
+                if bat_tags.text != "Battery Capacity" : raise NoSuchElementException
+                bat_capa = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][9]/table/tbody/tr/td[2]/ul/li')                
+            elif driver.find_element_by_xpath('//div[@class="_3k-BhJ"][8]/div').text == "Battery & Power Features" :
+                bat_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][8]/table/tbody/tr/td[1]')
+                if bat_tags.text != "Battery Capacity" : raise NoSuchElementException
+                bat_capa = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][8]/table/tbody/tr/td[2]/ul/li')
+            else:
+                raise NoSuchElementException
+        else :
+            bat_tags = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][10]/table/tbody/tr/td[1]')
+            if bat_tags.text != "Battery Capacity" : raise NoSuchElementException
+            bat_capa = driver.find_element_by_xpath('//div[@class="_3k-BhJ"][10]/table/tbody/tr/td[2]/ul/li')              
+        Smartphones['Battery Capacity'].append(bat_capa.text)
+    except NoSuchElementException:
+        Smartphones['Battery Capacity'].append('-')
+        
+        
+        
+    #Scraping Price data
+    try:
+        price_tags = driver.find_element_by_xpath('//div[@class="_30jeq3 _16Jk6d"]')      
+        Smartphones['Price'].append(price_tags.text)
+    except NoSuchElementException:
+        Smartphones['Price'].append('-')
+        
+Scraping URL =  https://www.flipkart.com/google-pixel-4a-just-black-128-gb/p/itm023b9677aa45d?pid=MOBFUSBNAZGY7HQU&lid=LSTMOBFUSBNAZGY7HQUWHTF0C&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_1&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFUSBNAZGY7HQU.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/google-pixel-3a-clearly-white-64-gb/p/itmfgk4jfgstaack?pid=MOBFFGFPJSCEXMSG&lid=LSTMOBFFGFPJSCEXMSGODGRZE&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_2&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFFGFPJSCEXMSG.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/google-pixel-3-just-black-64-gb/p/itmfbuyqxkruzg7j?pid=MOBF9GAQ6ZQXPJG7&lid=LSTMOBF9GAQ6ZQXPJG7093DXA&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_3&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBF9GAQ6ZQXPJG7.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-note-9-pebble-grey-64-gb/p/itmb9c65ffe0ee74?pid=MOBFU3ZFQ3GAGANG&lid=LSTMOBFU3ZFQ3GAGANG1QDSWB&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_4&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFU3ZFQ3GAGANG.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-note-9-shadow-black-64-gb/p/itm70628269ecd57?pid=MOBFXEPZM4DX89AQ&lid=LSTMOBFXEPZM4DX89AQLO98VX&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_5&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFXEPZM4DX89AQ.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-note-9-aqua-green-64-gb/p/itme8bb16e02dfa2?pid=MOBFU3ZFAB7VQJHY&lid=LSTMOBFU3ZFAB7VQJHY14W4ET&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_6&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFU3ZFAB7VQJHY.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9-sporty-orange-64-gb/p/itm4fb151383983b?pid=MOBFV5FPCJC9ZKRB&lid=LSTMOBFV5FPCJC9ZKRBWQGSFH&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_7&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFV5FPCJC9ZKRB.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9-sky-blue-64-gb/p/itm4fb151383983b?pid=MOBFV5FPUS8UHG9H&lid=LSTMOBFV5FPUS8UHG9HGCMHLK&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_8&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFV5FPUS8UHG9H.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/karbonn-kx3/p/itm60cf67471b066?pid=MOBFKVM39K9MDYFV&lid=LSTMOBFKVM39K9MDYFVYMNANT&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_9&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFKVM39K9MDYFV.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9a-nature-green-32-gb/p/itmeabd39a0cd669?pid=MOBFVDA5QCGNZKH9&lid=LSTMOBFVDA5QCGNZKH9BFDPPY&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_10&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFVDA5QCGNZKH9.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/lava-gem/p/itm77ce2feac253b?pid=MOBFMR92XWMXWMKE&lid=LSTMOBFMR92XWMXWMKEX8E5VN&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_11&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFMR92XWMXWMKE.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9-carbon-black-64-gb/p/itm4fb151383983b?pid=MOBFVHMPGATFZXWR&lid=LSTMOBFVHMPGATFZXWRXHETRQ&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_12&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFVHMPGATFZXWR.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9a-seablue-32-gb/p/itmeabd39a0cd669?pid=MOBFVD9ZGTYR2WGR&lid=LSTMOBFVD9ZGTYR2WGRRTPFAV&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_13&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFVD9ZGTYR2WGR.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9-prime-mint-green-64-gb/p/itm592f555768fff?pid=MOBFUSEP5YQJK4RE&lid=LSTMOBFUSEP5YQJK4RE2RE60U&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_14&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFUSEP5YQJK4RE.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-note-9-arctic-white-64-gb/p/itm4ab07b858925c?pid=MOBFU3ZFXMWJCSHP&lid=LSTMOBFU3ZFXMWJCSHPXQ6FTB&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_15&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFU3ZFXMWJCSHP.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-9-prime-matte-black-64-gb/p/itmeeb1764ec0fcf?pid=MOBFUSCC57HCZGKG&lid=LSTMOBFUSCC57HCZGKG0HQH7C&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_16&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFUSCC57HCZGKG.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/samsung-m31s-mirage-blue-128-gb/p/itm3c444f9c5c566?pid=MOBFUZYBUZWNKB6G&lid=LSTMOBFUZYBUZWNKB6G7KXYV1&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_17&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFUZYBUZWNKB6G.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/samsung-galaxy-m31s-mirage-black-128-gb/p/itm34ee37ee1d8a0?pid=MOBFVWCTZYMFQH3J&lid=LSTMOBFVWCTZYMFQH3JMGEEDN&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_18&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFVWCTZYMFQH3J.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/redmi-note-9-arctic-white-128-gb/p/itm7b7841c67bd44?pid=MOBFU3ZFB27C2VTH&lid=LSTMOBFU3ZFB27C2VTHWU3GQX&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_19&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFU3ZFB27C2VTH.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/kall-k-54/p/itmdba9d6bf40366?pid=MOBFZ9RVKW6CGCBZ&lid=LSTMOBFZ9RVKW6CGCBZR2CPHT&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_20&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFZ9RVKW6CGCBZ.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/micromax-x748/p/itmb0058b26c9100?pid=MOBFMMQGZQ6RWHFG&lid=LSTMOBFMMQGZQ6RWHFGCYVEQ3&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_21&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFMMQGZQ6RWHFG.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/kall-k-54/p/itmdba9d6bf40366?pid=MOBFZ9RTSYUNDWGJ&lid=LSTMOBFZ9RTSYUNDWGJQ6FBAB&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_22&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFZ9RTSYUNDWGJ.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/samsung-galaxy-m31-space-black-64-gb/p/itme0c5a25c1e64a?pid=MOBFPNPSZWQ7YKGH&lid=LSTMOBFPNPSZWQ7YKGHDN7LWD&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_23&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFPNPSZWQ7YKGH.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+Scraping URL =  https://www.flipkart.com/samsung-galaxy-m31s-mirage-black-128-gb/p/itmb9b4be5c16ee2?pid=MOBFV25HNQP3VNGP&lid=LSTMOBFV25HNQP3VNGPXMXJKJ&marketplace=FLIPKART&q=Pixel&store=tyy%2F4io&srno=s_1_24&otracker=search&otracker1=search&fm=SEARCH&iid=7b719969-8912-4497-a12c-f9e543806593.MOBFV25HNQP3VNGP.SEARCH&ppt=hp&ppn=homepage&ssid=th59w18ov40000001629526134993&qH=08822b3ae4e2aede
+#Checking lengths of all scraped data
+print(len(Smartphones["Brand"]), len(Smartphones["Phone name"]), len(Smartphones["Colour"]), len(Smartphones["RAM"]), len(Smartphones["Storage(ROM)"]), len(Smartphones["Primary Camera"]), len(Smartphones["Secondary Camera"]), len(Smartphones["Display Size"]), len(Smartphones["Display Resolution"]), len(Smartphones["Processor"]), len(Smartphones["Processor Cores"]), len(Smartphones["Battery Capacity"]), len(Smartphones["Price"]), len(Smartphones['URL']))
+24 24 24 24 24 24 24 24 24 24 24 24 24 24
+#Framing the data
+df = pd.DataFrame.from_dict(Smartphones)
+df
+Brand	Phone name	Colour	RAM	Storage(ROM)	Primary Camera	Secondary Camera	Display Size	Display Resolution	Processor	Processor Cores	Battery Capacity	Price	URL
+0	Google	Pixel 4a	Just Black	6 GB	128 GB	12.2MP Rear Camera	8MP Front Camera	14.76 cm (5.81 inch)	2340 x 1080 Pixels	Qualcomm Snapdragon 730G	Octa Core	3140 mAh	₹31,999	https://www.flipkart.com/google-pixel-4a-just-...
+1	Google	Pixel 3a	Clearly White	4 GB	64 GB	12.2MP Rear Camera	8MP Front Camera	14.22 cm (5.6 inch)	2220 x 1080 pixels	Qualcomm Snapdragon 670	Octa Core	3000 mAh	₹39,999	https://www.flipkart.com/google-pixel-3a-clear...
+2	Google	Pixel 3	Just Black	4 GB	64 GB	12.2MP Rear Camera	8MP + 8MP Dual Front Camera	13.97 cm (5.5 inch)	2160 x 1080 pixels	Qualcomm Snapdragon 845 64-bit	Octa Core	2915 mAh	₹65,999	https://www.flipkart.com/google-pixel-3-just-b...
+3	REDMI	Note 9	Pebble Grey	4 GB	64 GB	48MP + 8MP + 2MP + 2MP	-	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G85	Octa Core	5020 mAh	₹11,999	https://www.flipkart.com/redmi-note-9-pebble-g...
+4	REDMI	Note 9	Shadow Black	4 GB	64 GB	48MP + 8MP + 2MP + 2MP	-	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G85	Octa Core	5020 mAh	₹11,999	https://www.flipkart.com/redmi-note-9-shadow-b...
+5	REDMI	Note 9	Aqua Green	4 GB	64 GB	48MP + 8MP + 2MP + 2MP	-	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G85	Octa Core	5020 mAh	₹11,999	https://www.flipkart.com/redmi-note-9-aqua-gre...
+6	Redmi	Redmi 9	Sporty Orange	4 GB	64 GB	13MP + 2MP	5MP Front Camera	16.59 cm (6.53 inch)	720 x 1600$$pixel	MediaTek Helio G35	-	5000 mAh	₹9,745	https://www.flipkart.com/redmi-9-sporty-orange...
+7	Redmi	Redmi 9	Sky Blue	4 GB	64 GB	13MP + 2MP	5MP Front Camera	16.59 cm (6.53 inch)	720 x 1600$$pixel	MediaTek Helio G35	-	5000 mAh	₹9,778	https://www.flipkart.com/redmi-9-sky-blue-64-g...
+8	KARBONN	KX3	Black,Red	32 MB	32 MB	0.3MP Rear Camera	-	4.57 cm (1.8 inch)	128 x 160$$pixel	-	-	800 mAh	₹878	https://www.flipkart.com/karbonn-kx3/p/itm60cf...
+9	Redmi	Redmi 9A	Nature Green	2 GB	32 GB	13MP Rear Camera	-	16.59 cm (6.53 inch)	720 x 1600$$pixel	-	Octa Core	5000 mAh	₹7,447	https://www.flipkart.com/redmi-9a-nature-green...
+10	LAVA	Gem	Blue Gold S	32 MB	32 MB	1.3MP Rear Camera	-	7.11 cm (2.8 inch)	320 x 240$$pixel	-	-	1750 mAh	₹1,577	https://www.flipkart.com/lava-gem/p/itm77ce2fe...
+11	Redmi	Redmi 9	Carbon Black	4 GB	64 GB	13MP + 2MP	5MP Front Camera	16.59 cm (6.53 inch)	720 x 1600$$pixel	MediaTek Helio G35	Octa Core	5000 mAh	₹10,242	https://www.flipkart.com/redmi-9-carbon-black-...
+12	Redmi	Redmi 9A	SeaBlue	2 GB	32 GB	-	-	16.59 cm (6.53 inch)	720 x 1600$$pixel	-	Octa Core	5000 mAh	₹7,544	https://www.flipkart.com/redmi-9a-seablue-32-g...
+13	REDMI	9 Prime	Mint Green	4 GB	64 GB	13MP + 8MP + 5MP + 2MP	8MP Front Camera	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G80	Octa Core	5020 mAh	₹11,269	https://www.flipkart.com/redmi-9-prime-mint-gr...
+14	REDMI	Note 9	Arctic White	4 GB	64 GB	48MP + 8MP + 2MP + 2MP	-	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G85	Octa Core	5020 mAh	₹11,999	https://www.flipkart.com/redmi-note-9-arctic-w...
+15	REDMI	9 Prime	Matte Black	4 GB	64 GB	13MP + 8MP + 5MP + 2MP	8MP Front Camera	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G80	Octa Core	5020 mAh	₹11,980	https://www.flipkart.com/redmi-9-prime-matte-b...
+16	SAMSUNG	M31s	Mirage Blue	8 GB	128 GB	64MP + 12MP	32MP Front Camera	16.51 cm (6.5 inch)	1080 x 2400$$pixel	Exynos 9611 octa core processor	Octa Core	6000 mAh	₹19,745	https://www.flipkart.com/samsung-m31s-mirage-b...
+17	SAMSUNG	GALAXY M31S	Mirage Black	8 GB	128 GB	Primary Camera	-	16.51 cm (6.5 inch)	1080 x 2400$$pixel	-	Octa Core	-	₹19,534	https://www.flipkart.com/samsung-galaxy-m31s-m...
+18	REDMI	Note 9	Arctic White	4 GB	128 GB	48MP + 8MP + 2MP + 2MP	-	16.59 cm (6.53 inch)	2340 x 1080 Pixels	MediaTek Helio G85	Octa Core	5020 mAh	₹14,989	https://www.flipkart.com/redmi-note-9-arctic-w...
+19	I	K 54	Red, Black	32 MB	32 MB /64 MB	-	-	4.57 cm (1.8 inch)	128 x 160$$pixel	-	-	-	₹669	https://www.flipkart.com/kall-k-54/p/itmdba9d6...
+20	Micromax	X748	Black&Red	32 MB	32 MB	-	-	6.1 cm (2.4 inch)	320 x 240$$pixel	-	-	-	₹1,450	https://www.flipkart.com/micromax-x748/p/itmb0...
+21	I	K 54	Blue, Black	32 MB	64 MB	-	-	4.57 cm (1.8 inch)	128 x 160$$pixel	-	-	-	₹669	https://www.flipkart.com/kall-k-54/p/itmdba9d6...
+22	SAMSUNG	Galaxy M31	Space Black	6 GB	64 GB	64MP + 8MP + 5MP + 5MP	32MP Front Camera	16.26 cm (6.4 inch)	2340 x 1080$$pixel	Samsung Exynos 9 Octa 9611	Octa Core	6000 mAh	₹15,922	https://www.flipkart.com/samsung-galaxy-m31-sp...
+23	SAMSUNG	Galaxy M31s	Mirage Black	6 GB	128 GB	Primary Camera	-	16.51 cm (6.5 inch)	1080 x 2400$$pixel	-	Octa Core	-	₹17,896	https://www.flipkart.com/samsung-galaxy-m31s-m...
+#saving data to csv
+df.to_csv('Flipkart_{}.csv'.format(item))
+5. Write a program to scrap geospatial coordinates (latitude, longitude) of a city searched on google maps.
+# Activating the chrome browser
+driver=webdriver.Chrome("chromedriver.exe") 
+time.sleep(2)
+
+# opening google maps web page
+url = "https://www.google.co.in/maps"
+driver.get(url)
+time.sleep(2)
+
+#Sending keyword for seach bar and search button
+city = input('Enter City name that has to be searched : ')
+search_bar = driver.find_element_by_id("searchboxinput")                       
+search_bar.clear()                                                             
+time.sleep(2)
+search_bar.send_keys(city)                                                     
+search_btn = driver.find_element_by_id("searchbox-searchbutton")              
+search_btn.click()                                                             
+time.sleep(3)
+
+try:
+    url_str = driver.current_url
+    print("URL Extracted: ", url_str)
+    latitude_longitude = re.findall(r'@(.*)data',url_str)
+    if len(latitude_longitude):
+        lat_lng_list = latitude_longitude[0].split(",")
+        if len(lat_lng_list)>=2:
+            latitude = lat_lng_list[0]
+            longitude = lat_lng_list[1]
+        print("Latitude = {}, Longitude = {}".format(latitude, longitude))
+
+except Exception as e:
+        print("Error: ", str(e))
+Enter City name that has to be searched : Bangalore
+URL Extracted:  https://www.google.co.in/maps/place/Bengaluru,+Karnataka/@15.0172605,76.3178081,7z/data=!4m5!3m4!1s0x3bae1670c9b44e6d:0xf8dfc3e8517e4fe0!8m2!3d12.9715987!4d77.5945627
+Latitude = 15.0172605, Longitude = 76.3178081
+I have scraped the required information using selenium.
+
+6. Write a program to scrap details of all the funding deals for second quarter (i.e. July 20 – September 20) from trak.in.
+#Activating the chrome browser
+driver.get('https://trak.in/')
+#Getting xpath for funding deals
+fund_button = driver.find_element_by_xpath('//li[@id="menu-item-51510"]/a').get_attribute('href')
+driver.get(fund_button)
+#Creating empty lists
+fund_deals = {}
+fund_deals['Date'] = []
+fund_deals['Startup Name'] = []
+fund_deals['Industry OR Vertical'] = []
+fund_deals['Sub-Vertical'] = []
+fund_deals['Location'] = []
+fund_deals['Investor'] = []
+fund_deals['Investment Type'] = []
+fund_deals['Amount(in USD)'] = []
+#Clicking on tablepress
+for i in range(48,51):
+    driver.find_element_by_xpath('//div[@id="tablepress-{}_wrapper"]/div/label/select/option[4]'.format(i)).click()
+
+    # Scraping data of Date
+    date_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[2]'.format(i))
+    for date in date_tags:
+        fund_deals['Date'].append(date.text)
+
+    # Scraping data of Startup Name
+    name_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[3]'.format(i))
+    for name in name_tags:
+        fund_deals['Startup Name'].append(name.text)
+    
+    # Scraping data of Industry OR Vertical
+    ind_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[4]'.format(i))
+    for n in ind_tags:
+        fund_deals['Industry OR Vertical'].append(n.text)
+    
+    # Scraping data of Sub-Vertical
+    sv_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[5]'.format(i))
+    for sv in sv_tags:
+        fund_deals['Sub-Vertical'].append(sv.text)
+
+    # Scraping data of Location
+    loc_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[6]'.format(i))
+    for loc in loc_tags:
+        fund_deals['Location'].append(loc.text)
+    
+    # Scraping data of Investor
+    inv_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[7]'.format(i))
+    for inv in inv_tags:
+        fund_deals['Investor'].append(inv.text)
+        
+    # Scraping data of Investment Type
+    invt_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[8]'.format(i))
+    for invt in invt_tags:
+        fund_deals['Investment Type'].append(invt.text)
+    
+    # Scraping data of Amount
+    amt_tags = driver.find_elements_by_xpath('//table[@id="tablepress-{}"]/tbody/tr/td[9]'.format(i))
+    for amt in amt_tags:
+        fund_deals['Amount(in USD)'].append(amt.text)
+#Framimg the scraped data
+fund_df = pd.DataFrame(fund_deals)
+fund_df
+Date	Startup Name	Industry OR Vertical	Sub-Vertical	Location	Investor	Investment Type	Amount(in USD)
+0	15/07/2020	Flipkart	E-commerce	E-commerce	Bangalore	Walmart Inc	M&A	1,200,000,000
+1	16/07/2020	Vedantu	EduTech	Online Tutoring	Bangalore	Coatue Management	Series D	100,000,000
+2	16/07/2020	Crio	EduTech	Learning Platform for Developers	Bangalore	021 Capital	pre-Series A	934,160
+3	14/07/2020	goDutch	FinTech	Group Payments	Mumbai	Matrix India,Y Combinator, Global Founders Cap...	Seed	1,700,000
+4	13/07/2020	Mystifly	Airfare Marketplace	Ticketing, Airline Retailing, and Post-Ticketi...	Singapore and Bangalore	Recruit Co. Ltd.	pre-Series B	3,300,000
+5	09/07/2020	JetSynthesys	Gaming and Entertainment	Gaming and Entertainment	Pune	Adar Poonawalla and Kris Gopalakrishnan.	Venture-Series Unknown	400,000
+6	10/07/2020	gigIndia	Marketplace	Crowd Sourcing, Freelance	Pune	Incubate Fund India and Beyond Next Ventures	pre-Series A	974,200
+7	15/07/2020	PumPumPum	Automotive Rental	Used Car-leasing platform	Gurgaon	Early Adapters Syndicate	Seed	292,800
+8	14/07/2020	FLYX	OTT Player	Streaming Social Network	New York and Delhi	Raj Mishra, founder of AIT Global Inc	pre-Seed	200,000
+9	13/07/2020	Open Appliances Pvt. Ltd.	Information Technology	Internet-of-Things Security Solutions	Bangalore	Unicorn India Ventures	Venture-Series Unknown	500,000
+10	15/08/2020	Practo	HealthTech	Health care and Wellness	Bangalore	A1A Company	Series F	32,000,000
+11	13/08/2020	Medlife	E-commerce	Online Pharmacy	Bangalore	Prasid Uno Family Trust and SC Credit Fund		23,000,000
+12	13/08/2020	HungerBox	FoodTech	Online Food Delivery Service	Bangalore	One97, Sabre Partners Trust, Pratithi Investme...	Series D1	1,560,000
+13	04/08/2020	Dunzo	Hyper-local Logistics	Online Delivery Services	Bangalore	Existing Backers	In Progress	30,000,000
+14	11/08/2020	Terra.do	EduTech	Online Climate School, E-learning	Stanford, California,	Stanford Angels and Entrepreneurs (India), BEE...	Seed	1,400,000
+15	12/08/2020	Classplus	EduTech	E-learning, Online Tutoring	Noida	Falcon Edge	In Progress	upto 15,000,000
+16	14/08/2020	Niyo	FinTech	Financial Services	Bangalore	Niyo Solutions Inc.		6,000,000
+17	10/08/2020	ZestMoney	FinTech	Financial Services	Bangalore	Primrose Hills Ventures		10,670,000
+18	07/08/2020	FreshToHome	E-commerce	Food Delivery	Bangalore	Ascent Capital	Venture	16,200,000
+19	13/08/2020	Eduvanz	FinTech	Financial Services	Mumbai	Sequoia India, Unitus	Series A	5,000,000
+20	03/08/2020	CrowdPouch	FinTech	Financial Services	Bangalore	Elina Investments Pvt. Ltd	Angel	NA
+21	04/08/2020	DrinkPrime	Water Purification	Water Purification	Bangalore	Sequoia Surge, ON Mauritius	Pre-Series A	2,880,000
+22	08/09/2020	Byju’s	EduTech	Online Tutoring	Bangalore	Silver Lake, Tiger Global, General Atlantic an...	Private Equity	500,000,000
+23	12/09/2020	mCaffeine	Personal Care	Skincare & Haircare	Mumbai	Amicus Capital Private Equity I LLP, Amicus Ca...	Series B	3,000,000
+24	09/09/2020	Qshala	EduTech	Online Curiosity Platform for Kids	Bangalore	Rainmatter Capital	Angel	370,000
+25	02/09/2020	Winzo	Online Gaming	Online Gaming	New Delhi	Kalaari Capital Partners, IndigoEdge Managemen...	Series B	15,500,000
+26	09/09/2020	Hippo Video	Video Customer Experience(CX) Platform	Video Customer Experience(CX) Platform	Newark, Delaware, United States of Amercia	Alpha Wave Incubation, Exfinity Venture Partne...	Series A	4,500,000
+27	07/09/2020	Melorra	E-commerce	Online Jewelry Store	Bangalore	Shadow Holdings, Lightbox.	Debt Financing	upto 8,900,000
+28	07/09/2020	1mg	E-commerce	Online Pharmacy	Gurgaon	Gaja Capital, Tata Capital, Partners Group	In Progress	100,000,000
+29	31/08/2020	mfine	HealthTech	On-Demand Healthcare Services	Bangalore	Caretech Pte Inc	Series B	5,400,000
+30	31/08/2020	Apna	Human Resources	Recruitment Platform	Bangalore	Lightspeed India and Sequoia Capital India	Series A	8,000,000
+31	03/09/2020	Railofy	Transportation	WL & RAC protection platform	Mumbai	Chiratae Ventures	Seed	950,000
+32	08/09/2020	Cell Propulsion	Automobile	Electric Mobility Solutions	Bangalore	growX Ventures and Micelio	pre-Series A	NA
+#Saving data to csv
+fund_df.to_csv("Trak_in.csv")
+7. Write a program to scrap all the available details of best gaming laptops from digit.in.
+# Activating the chrome browser
+driver=webdriver.Chrome("chromedriver.exe") 
+time.sleep(2)
+#Opening the specified url
+url = "https://www.digit.in/"
+driver.get(url)
+time.sleep(3)
+#searching for best laptop
+best_gam_lap = driver.find_element_by_xpath("//div[@class='listing_container']//ul//li[9]").click()
+time.sleep(4)
+#Creating empty lists
+lap_name = []
+ope_sys = []
+display = []
+processor = []
+memory = []
+weight = []
+dimensions = []
+graph_proc = []
+price = []
+# Scraping the data of laptop names
+name_tags = driver.find_elements_by_xpath("//table[@id='summtable']//tr//td[1]")
+for name in name_tags:
+    lap_name.append(name.text)
+    
+    
+#Scraping the data of operating system
+try:
+    os_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[3]//td[3]")
+    for os in os_tags:
+        ope_sys.append(os.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of display
+try:
+    disp_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[4]//td[3]")
+    for disp in disp_tags:
+        display.append(disp.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of Processor
+try:
+    pro_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[5]//td[3]")
+    for pro in pro_tags:
+        processor.append(pro.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of memory
+try:
+    memo_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[6]//td[3]")
+    for memo in memo_tags:
+        memory.append(memo.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of weight
+try:
+    wgt_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[7]//td[3]")
+    for wgt in wgt_tags:
+        weight.append(wgt.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of dimensions
+try:
+    dim_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[8]//td[3]")
+    for dim in dim_tags:
+        dimensions.append(dim.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of Graph processor
+try:
+    gra_tags = driver.find_elements_by_xpath("//div[@class='Spcs-details']//tr[9]//td[3]")
+    for gra in gra_tags:
+        graph_proc.append(gra.text)
+except NoSuchElementException:
+    pass
+
+
+#Scraping data of price
+try:
+    pri_tags = driver.find_elements_by_xpath("//td[@class='smprice']")
+    for pri in pri_tags:
+        price.append(pri.text.replace('₹','Rs '))
+except NoSuchElementException:
+    pass
+#DATA FRAMEING
+Gaming_Laptop=pd.DataFrame({})
+Gaming_Laptop['Laptop Name'] = lap_name
+Gaming_Laptop['Operating system'] = ope_sys
+Gaming_Laptop['Display'] = display
+Gaming_Laptop['Processor'] = processor
+Gaming_Laptop['Memory'] = memory
+Gaming_Laptop['Weight'] = weight
+Gaming_Laptop['Dimensions'] = dimensions
+Gaming_Laptop['Graphical Processor'] = graph_proc
+Gaming_Laptop['Price'] = price
+#Printing data frame
+Gaming_Laptop
+Laptop Name	Operating system	Display	Processor	Memory	Weight	Dimensions	Graphical Processor	Price
+0	Alienware Area 51M R2	Windows 10 Home	17.3" (1920 x 1080)	10th Generation Intel® Core™ i7-10700 | 2.90 GHz	1 TB SSD/16 GBGB DDR4	4.1	27.65 x 402.6 x 319.14	Intel® UHD Graphics 630	N/A
+1	Alienware m15 R3	Windows 10 Home	15.6" (3840 x 2160)	10th Generation Intel® Core™ i9-10980HK | NA	1 TB SSD/16 GBGB DDR4	NA	NA	NA	Rs 341990
+2	ASUS ROG Strix Scar 15	Windows 10 Home	15.6" (1920 x 1080)	AMD Ryzen™ 9 5900HX | 3.3 GHz	1 TB SSD/16 GBGB DDR4	2.30	35.4 x 25.9 x 2.26	NVIDIA® GeForce RTX™ 3070	N/A
+3	Asus ROG Zephyrus G14	Windows 10 Home	14" (1920 x 1080)	AMD 3rd Generation Ryzen 9 | 3.3 GHz	1 TB SSD/16 GBGB DDR4	1.65	32.5 x 22.1 x 1.8	NVIDIA GeForce RTX 2060	Rs 164990
+4	Lenovo Legion 5i	Windows 10 Pro	15.6" (1920 x 1080)	10th Generation Intel® Core™ i5-10300H | 2.50 GHz	1 TB SSD/16 GBGB DDR4	2.3	363.06 x 259.61 x 23.57	NVIDIA® GeForce® GTX 1650 4GB	Rs 76988
+5	ASUS ROG ZEPHYRUS DUO 15	Windows 10	15.6" (3840 x 1100)	Intel Core i7 10th Gen 10875H | NA	512 GB SSD/4 GBGB DDR4	2.4	268.30 x 360.00 x 20.90	NVIDIA GeForce RTX 2070 Max-Q	Rs 185000
+6	Acer Aspire 7 gaming	Windows 10 Home	15.6" (1920 x 1080)	AMD Ryzen™ 5-5500U hexa-core | NA	512 GB SSD/8 GBGB DDR4	2.15	2.29 x 36.3 x 25.4	NVIDIA® GeForce® GTX 1650	Rs 64370
+#Saving dataset to csv
+Gaming_Laptop.to_csv("Gaming_laptops.csv")
+8. Write a python program to scrape the details for all billionaires from www.forbes.com. Details to be scrapped: “Rank”, “Name”, “Net worth”, “Age”, “Citizenship”, “Source”, “Industry”.
+# Activating the chrome browser
+driver=webdriver.Chrome("chromedriver.exe") 
+time.sleep(2)
+
+#get the specified url
+url = "https://www.forbes.com/?sh=69e6b8c92254"
+driver.get(url)
+time.sleep(3)
+
+#clicking the explore button
+button = driver.find_element_by_xpath("//button[@class='icon--hamburger']")
+button.click()
+time.sleep(1)
+
+#select billionaire  
+bill = driver.find_element_by_xpath("/html/body/div[1]/header/nav/div[3]/ul/li[1]")
+bill.click()
+time.sleep(1)
+
+#select world billionaire  
+world_bill= driver.find_element_by_xpath("/html/body/div[1]/header/nav/div[3]/ul/li[1]/div[2]/ul/li[2]/a")
+world_bill.click()
+time.sleep(1)
+#Scraping required data from the web page
+#Creating empty lists
+Rank = []
+Person_Name = []
+total_net_worth = []
+Age = []
+citizenship = []
+Source = []
+industry = []
+
+
+while(True):
+    #Scraping the data of rank
+    rank_tags= driver.find_elements_by_xpath("//div[@class='rank']")
+    for rank in rank_tags:
+        Rank.append(rank.text)
+    time.sleep(1)
+    
+    
+    #Scraping the data of names
+    name_tags= driver.find_elements_by_xpath("//div[@class='personName']//div")
+    for name in name_tags:
+        Person_Name.append(name.text)
+    time.sleep(1)
+    
+    
+    #Scraping data of age
+    age_tags= driver.find_elements_by_xpath("//div[@class='age']//div")
+    for age in age_tags:
+        Age.append(age.text)   
+    time.sleep(1)
+    
+    
+    #Scraping data of citizenship
+    cit_tags= driver.find_elements_by_xpath("//div[@class='countryOfCitizenship']")
+    for cit in cit_tags:
+        citizenship.append(cit.text)
+    time.sleep(1)
+    
+    
+    #Scraping data of source of income
+    sour_tags= driver.find_elements_by_xpath("//div[@class='source']")
+    for sour in sour_tags:
+        Source.append(sour.text)    
+    time.sleep(1)
+    
+    
+    #Scraping data of Industry
+    ind_tags= driver.find_elements_by_xpath("//div[@class='category']//div")
+    for ind in ind_tags:
+        industry.append(ind.text)
+        
+        
+    #scraping data of net_worth of billionaire 
+    net_tags= driver.find_elements_by_xpath("//div[@class='netWorth']//div[1]")
+    for net in net_tags:
+        total_net_worth.append(net.text)
+    time.sleep(1)
+    
+    
+    #Clicking on next button
+    try:
+        next_button = driver.find_element_by_xpath("//button[@class='pagination-btn pagination-btn--next ']")
+        next_button.click()
+    except:
+        break
+        
+#Scraping data of net worth
+Net_Worth = []
+for i in range(0,len(total_net_worth),2):
+    Net_Worth.append(total_net_worth[i])
+#Framing data
+Billionaires=pd.DataFrame({})
+Billionaires['Rank'] = Rank
+Billionaires['Names'] = Person_Name
+Billionaires['Net Worth'] = Net_Worth
+Billionaires['Age'] = Age
+Billionaires['Citizenship'] = citizenship
+Billionaires['Source'] = Source
+Billionaires['Industry'] = industry
+#Printing dataframe
+Billionaires
+Rank	Names	Net Worth	Age	Citizenship	Source	Industry
+0	1.	Jeff Bezos	$177 B	57	United States	Amazon	Technology
+1	2.	Elon Musk	$151 B	49	United States	Tesla, SpaceX	Automotive
+2	3.	Bernard Arnault & family	$150 B	72	France	LVMH	Fashion & Retail
+3	4.	Bill Gates	$124 B	65	United States	Microsoft	Technology
+4	5.	Mark Zuckerberg	$97 B	36	United States	Facebook	Technology
+...	...	...	...	...	...	...	...
+2750	2674.	Daniel Yong Zhang	$1 B	49	China	e-commerce	Technology
+2751	2674.	Zhang Yuqiang	$1 B	65	China	Fiberglass	Manufacturing
+2752	2674.	Zhao Meiguang	$1 B	58	China	gold mining	Metals & Mining
+2753	2674.	Zhong Naixiong	$1 B	58	China	conglomerate	Diversified
+2754	2674.	Zhou Wei family	$1 B	54	China	Software	Technology
+2755 rows × 7 columns
+
+#Saving dataset to csv
+Billionaires.to_csv("Billionaries.csv")
+9. Write a program to extract at least 500 Comments, Comment upvote and time when comment was posted from any YouTube Video.
+# Activating the chrome browser
+driver=webdriver.Chrome("chromedriver.exe")
+time.sleep(2)
+# Opening youtube
+url = "https://www.youtube.com/"
+driver.get(url)
+time.sleep(2)
+#finding element for search bar
+search_bar = driver.find_element_by_id('search')
+search_bar.send_keys("GOT")  #entering Video name
+time.sleep(1)
+#clicking on search button
+search_btn = driver.find_element_by_id("search-icon-legacy")  
+search_btn.click()
+time.sleep(1)
+#clicking on first video
+link_click = driver.find_element_by_xpath("//yt-formatted-string[@class ='style-scope ytd-video-renderer']")
+link_click.click()
+# 1000 time we scroll down to generate more Comments
+for _ in range(1000):
+    driver.execute_script("window.scrollBy(0,10000)")
+#make empty lists
+comments = []
+comment_time = []
+Time = []
+Likes = []
+No_of_Likes = []
+#scraping the data of comments
+cm_tags = driver.find_elements_by_id("content-text")
+for cm in cm_tags:
+    if cm.text is None:
+        comments.append("--")
+    else:
+        comments.append(cm.text)
+time.sleep(5)
+# scraping the data of time when comment was posted
+tm_tags = driver.find_elements_by_xpath("//a[contains(text(),'ago')]")
+for tm in tm_tags:
+    Time.append(tm.text)
+
+for i in range(0,len(Time),2):
+    comment_time.append(Time[i])
+time.sleep(5)
+# scraping the data of comment likes
+like_tags = driver.find_elements_by_xpath("//span[@class='style-scope ytd-comment-action-buttons-renderer']")
+for like in like_tags:
+    Likes.append(like.text)
+    
+for i in range(1,len(Likes),2):
+    No_of_Likes.append(Likes[i])
+#Creating dataframe
+Youtube=pd.DataFrame({})
+Youtube['Comments'] = comments
+Youtube['Comment_time'] = comment_time
+Youtube['Comment upvotes'] = No_of_Likes
+#Printing dataframe
+Youtube
+Comments	Comment_time	Comment upvotes
+0	she was so amazing. how could they do this to ...	8 months ago	11K
+1	I swear this was probably one of the most BOSS...	4 months ago	3K
+2	the way she just turns around and says “dracar...	5 months ago	2.8K
+3	Anyone else think that the first unsullied to ...	6 months ago	1.8K
+4	“But harm no child” season 8 forgets only this...	3 months ago	1.4K
+...	...	...	...
+315	this is her best "dracarys" pronunciation... I...	3 years ago	1.5K
+316	Man, I miss the days when Dany was a real char...	1 month ago (edited)	
+317	I’ve watched this 20 times now	3 months ago	2
+318	One of TVs greatest moments	3 months ago	
+319	What a scene that was. Goosebumps arrived	3 months ago	
+320 rows × 3 columns
+
+#Saving dataset to csv
+Youtube.to_csv("Youtube.csv")
+10. Write a python program to scrape a data for all available Hostels from https://www.hostelworld.com/ in “London” location. You have to scrape hostel name, distance from city centre, ratings, total reviews, overall reviews, privates from price, dorms from price, facilities and property description.
+# Activating the chrome browser
+driver=webdriver.Chrome("chromedriver.exe") 
+time.sleep(3)
+
+#get the web page with given url
+url = "https://www.hostelworld.com/"
+driver.get(url)
+time.sleep(5)
+#locating the location search bar
+search_loc = driver.find_element_by_id('search-input-field')
+# write Lonodn in search bar
+search_loc.send_keys("London")
+time.sleep(5)
+
+#select london
+london = driver.find_element_by_xpath('/html/body/div[1]/div/div/div[1]/div[1]/div/div[2]/div[4]/div/div[2]/div/div[1]/div/div/ul/li[2]/div')
+london.click()
+time.sleep(5)
+
+
+# do click on search button
+search_btn = driver.find_element_by_id('search-button')
+search_btn.click()
+#lets find required data
+hostel_name = []
+distance = []
+pvt_prices = []
+dorms_price = []
+rating = []
+reviews = []
+over_all = []
+facilities = []
+description =[]
+product_url = []
+#Scraping the requered informations
+for i in driver.find_elements_by_xpath("//div[@class = 'pagination-item pagination-current' or @class='pagination-item']"):
+    i.click()
+    time.sleep(4)
+    #fetching hostel name
+    try:
+        name = driver.find_elements_by_xpath("//h2[@class='title title-6']")
+        for i in name:
+            hostel_name.append(i.text)
+    except NoSuchElementException:
+        hostel_name.append('-')
+    #fetching distance from city centre
+    
+    try:
+        dist = driver.find_elements_by_xpath("//div[@class='subtitle body-3']//a//span[1]")
+        for i in dist:
+            distance.append(i.text.replace('Hostel - ',''))
+    except NoSuchElementException:
+        distance.append('-')
+        
+    for i in driver.find_elements_by_xpath("//div[@class='prices-col']"):
+    #fetch privates from price
+        try:
+            pvt_price = driver.find_element_by_xpath("//a[@class='prices']//div[1]//div")
+            pvt_prices.append(pvt_price.text)
+        except NoSuchElementException:
+            pvt_prices.append('-')
+    #fetching dorms from price
+    for i in driver.find_elements_by_xpath("//div[@class='prices-col']"):
+        try:
+            dorms = driver.find_element_by_xpath("//a[@class='prices']//div[2]//div")
+            dorms_price.append(dorms.text)
+        except NoSuchElementException:
+            dorms_price.append('-')
+            #fetching facilities
+    try:
+        fac1 = driver.find_elements_by_xpath("//div[@class='has-wifi']")
+        fac2 = driver.find_elements_by_xpath("//div[@class='has-sanitation']")
+        for i in fac1:
+            for j in fac2:
+                facilities.append(i.text +', '+ j.text )
+    except NoSuchElementException:
+        facilities.append('-')
+    #lets fetch url of each hostel
+    p_url = driver.find_elements_by_xpath("//div[@class='prices-col']//a[2]")
+    for i in p_url:
+        product_url.append(i.get_attribute('href'))
+
+for i in product_url:
+    driver.get(i)
+    time.sleep(3)
+    #lets click on show more button for description
+    try:
+        driver.find_element_by_xpath("//a[@class='toggle-content']").click()
+        time.sleep(5)
+    except NoSuchElementException:
+        pass
+    #fetching ratings
+    try:
+        rat = driver.find_element_by_xpath("//div[@class='score orange big' or @class='score gray big']")
+        rating.append(rat.text)
+    except NoSuchElementException:
+        rating.append('-')
+    #fetching total reviews
+        
+    try:
+        rws = driver.find_element_by_xpath("//div[@class='reviews']")
+        reviews.append(rws.text.replace('Total Reviews',''))
+    except NoSuchElementException:
+        reviews.append('-')
+        #fetch overall review
+    try:
+        overall_rw = driver.find_element_by_xpath("//div[@class='keyword']//span")
+        over_all.append(overall_rw.text)
+    except NoSuchElementException:
+        over_all.append('-')
+    #fetch property description 
+    try:
+        disc = driver.find_element_by_xpath("//div[@class='content']")
+        description.append(disc.text)
+    except NoSuchElementException:
+        over_all.append('-')
+#Creating dataframe
+dff = pd.DataFrame({})
+dff['Hostel_Name'] = hostel_name
+dff['Distance fron city centre'] = distance
+dff['Ratings'] = rating
+dff['Total_reviews'] = reviews
+dff['Overall Reviews'] = over_all
+dff['Privates from price'] = pvt_prices
+dff['Dorms from price'] = dorms_price
+dff['Facilities'] = facilities[:83]
+dff['Description'] = description
+#Printing data frame
+dff
+Hostel_Name	Distance fron city centre	Ratings	Total_reviews	Overall Reviews	Privates from price	Dorms from price	Facilities	Description
+0	London Waterloo Hostel	0.7km from city centre	7.6	2409	Very Good	Rs8064	Rs1520	Free WiFi, Follows Covid-19 sanitation guidance	73 Lambeth Walk, London, London, England
+1	Wombat's The City Hostel London	3.6km from city centre	9.2	13140	Superb	Rs8064	Rs1520	Free WiFi, Follows Covid-19 sanitation guidance	7 Dock Street, London, England
+2	Prime Backpackers Angel	3.6km from city centre	10	513	Superb	Rs8064	Rs1520	Free WiFi, Follows Covid-19 sanitation guidance	333 City Road, 333 City Road, London, England
+3	St Christopher's Village	1.8km from city centre	8.9	10827	Fabulous	Rs8064	Rs1520	Free WiFi, Follows Covid-19 sanitation guidance	165 Borough High Street, London, England
+4	PubLove @ The Steam Engine, Waterloo	0.5km from city centre	9.0	189	Superb	Rs8064	Rs1520	Free WiFi, Follows Covid-19 sanitation guidance	41-42 Cosser St, London, England
+...	...	...	...	...	...	...	...	...	...
+78	The Dover	Hotel - 1.9km from city centre	-	0	No Rating	Rs4053	Rs1722	Free WiFi, Follows Covid-19 sanitation guidance	44 Belgrave Road, London, England
+79	Park Hotel Essex	Hotel - 24.1km from city centre	-	0	No Rating	Rs4053	Rs1722	Free WiFi, Follows Covid-19 sanitation guidance	327 Cranbrook Road, Ilford, London, England
+80	Cranbrook Hotel	Hotel - 14.8km from city centre	-	0	No Rating	Rs4053	Rs1722	Free WiFi, Follows Covid-19 sanitation guidance	22/24 Coventry Road, Ilford, London, England
+81	St. Athans	Bed and Breakfast - 2.9km from city centre	-	0	No Rating	Rs4053	Rs1722	Free WiFi, Follows Covid-19 sanitation guidance	20 Tavistock Place, Russell Square, London, En...
+82	Aron Guest House	Bed and Breakfast - 13.1km from city centre	-	0	No Rating	Rs4053	Rs1722	Free WiFi, Follows Covid-19 sanitation guidance	27 South Ealing, London, England
+83 rows × 9 columns
+
+#Saving dataset to csv
+dff.to_csv("London_Hostels.csv")
