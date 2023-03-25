@@ -1,0 +1,675 @@
+WEB SCRAPING ASSIGNMENT 4
+#install selenium
+!pip install selenium
+Requirement already satisfied: selenium in c:\users\chaitali nakade\anaconda3\lib\site-packages (3.141.0)
+Requirement already satisfied: urllib3 in c:\users\chaitali nakade\anaconda3\lib\site-packages (from selenium) (1.25.11)
+#import all neccessory libreries of selenium
+
+import selenium
+import pandas as pd
+from selenium import webdriver
+libreries imported
+
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+Que1.- Scrape the details of most viewed videos on YouTube from Wikipedia:Url = https://en.wikipedia.org/wiki/List_of_most-viewed_YouTube_videos/ You need to find following details:
+A) Rank
+B) Name
+C) Artist
+D) Upload date
+E) Views
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://en.wikipedia.org/wiki/List_of_most-viewed_YouTube_videos'
+web_driver.get(url)
+#the url will open
+#extract the tag having rank
+link = web_driver.find_elements_by_xpath("//td[@align='center']")
+
+#to remove extra data other than output we required
+Rank = [] #empty list
+Name = [] #empty list
+Artist = [] #empty list
+Upload_date = [] #empty list
+
+for i in link:
+    Rank.append(i.text.replace('.', '').replace(' ', ''))
+
+RANK = []
+for i in Rank[0:30:3]:
+    RANK.append(i)
+
+for i in Rank[30: :2]:
+    RANK.append(i)
+#extract the tag having Name
+name = web_driver.find_elements_by_xpath("//table[@class='wikitable sortable jquery-tablesorter']//td")
+
+#to remove extra data other than output we required
+
+for i in name:
+    Name.append(i.text)
+    
+NAME = []
+for i in Name[1: :6]:
+    NAME.append(i.replace('"', ''))
+#extract the tag having Artist
+artist = web_driver.find_elements_by_xpath("//table[@class='wikitable sortable jquery-tablesorter']//td")
+
+#to remove extra data other than output we required
+
+for i in artist:
+    Artist.append(i.text)
+
+ARTIST = []
+for i in Artist[2: :6]:
+    ARTIST.append(i.replace('"', ''))
+#extract the tag having Artist
+upload = web_driver.find_elements_by_xpath("//table[@class='wikitable sortable jquery-tablesorter']//td")
+
+#to remove extra data other than output we required
+
+for i in upload:
+    Upload_date.append(i.text)
+
+UPLOAD_DATE = []
+for i in Upload_date[4: :6]:
+    UPLOAD_DATE.append(i.replace('"', ''))
+#extract the tag having Artist
+view = web_driver.find_elements_by_xpath("//table[@class='wikitable sortable jquery-tablesorter']//td")
+
+#to remove extra data other than output we required
+View = [] #empty list
+
+for i in view:
+    View.append(i.text)
+
+VIEW_billions = []
+for i in View[3: :6]:
+    VIEW_billions.append(i.replace('"', ''))
+# Make data frame of Most viewed video from wikipedia.com
+MOST_VIEW = pd.DataFrame({})
+MOST_VIEW['RANK']= RANK[0:30]
+MOST_VIEW['NAME'] = NAME[0:30]
+MOST_VIEW['ARTIST'] = ARTIST[0:30] 
+MOST_VIEW['UPLOAD DATE'] = UPLOAD_DATE[0:30]
+MOST_VIEW['VIEWS in billions'] = VIEW_billions[0:30] 
+MOST_VIEW
+RANK	NAME	ARTIST	UPLOAD DATE	VIEWS in billions
+0	1	Baby Shark Dance[23]	Pinkfong Kids' Songs & Stories	June 17, 2016	9.27
+1	2	Despacito[25]	Luis Fonsi	January 12, 2017	7.52
+2	3	Johny Johny Yes Papa[26]	LooLoo Kids	October 8, 2016	5.68
+3	4	Shape of You[27]	Ed Sheeran	January 30, 2017	5.45
+4	5	See You Again[28]	Wiz Khalifa	April 6, 2015	5.25
+5	6	Bath Song[31]	Cocomelon – Nursery Rhymes	May 2, 2018	4.49
+6	7	Learning Colors – Colorful Eggs on a Farm[32]	Miroshka TV	February 27, 2018	4.46
+7	8	Masha and the Bear – Recipe for Disaster[33]	Get Movies	January 31, 2012	4.46
+8	9	Uptown Funk[34]	Mark Ronson	November 19, 2014	4.28
+9	10	Gangnam Style[35]	Psy	July 15, 2012	4.18
+10	11	Phonics Song with Two Words[37]	ChuChu TV	March 6, 2014	4.14
+11	12	Dame Tu Cosita[38]	El Chombo	April 5, 2018	3.57
+12	13	Sugar[39]	Maroon 5	January 14, 2015	3.54
+13	14	Sorry[40]	Justin Bieber	October 22, 2015	3.46
+14	15	Roar[41]	Katy Perry	September 5, 2013	3.42
+15	16	Counting Stars[42]	OneRepublic	May 31, 2013	3.38
+16	17	Thinking Out Loud[43]	Ed Sheeran	October 7, 2014	3.31
+17	18	Wheels on the Bus[44]	Cocomelon – Nursery Rhymes	May 24, 2018	3.24
+18	19	Dark Horse[45]	Katy Perry	February 20, 2014	3.14
+19	20	Faded[46]	Alan Walker	December 3, 2015	3.13
+20	21	Girls Like You[47]	Maroon 5	May 31, 2018	3.11
+21	22	Shake It Off[48]	Taylor Swift	August 18, 2014	3.09
+22	23	Lean On[49]	Major Lazer	March 22, 2015	3.09
+23	24	Bailando[50]	Enrique Iglesias	April 11, 2014	3.09
+24	25	Let Her Go[51]	Passenger	July 25, 2012	3.07
+25	26	Axel F[52]	Crazy Frog	June 16, 2009	2.98
+26	27	Mi Gente[53]	J Balvin	June 29, 2017	2.97
+27	28	Perfect[54]	Ed Sheeran	November 9, 2017	2.94
+28	29	Waka Waka (This Time for Africa)[55]	Shakira	June 4, 2010	2.93
+29	30	Hello[56]	Adele	October 22, 2015	2.88
+Que.2- Scrape the details team India’s international fixtures from bcci.tv.Url = https://www.bcci.tv/.You need to find following details:
+A) Match title (I.e. 1st ODI)
+B) Series
+C) Place
+D) Date
+E) Time
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://www.bcci.tv/'
+web_driver.get(url)
+#the url will open
+#serch button click
+Ficxture_button = web_driver.find_element_by_xpath("//div[@class='navigation__drop-down drop-down drop-down--reveal-on-hover']")
+Ficxture_button.click()
+#serch button click
+Ficx_button = web_driver.find_element_by_id("TestAlexFilter")
+Ficx_button.click()
+#serch button click
+match_button = web_driver.find_element_by_xpath("/html/body/div[4]/div/div/div[2]/div/div/div[3]/div/div[2]/div/ul/li[3]")
+match_button.click()
+#extract the tag having Name
+match = web_driver.find_elements_by_xpath("//strong[@class='fixture__name fixture__name--with-margin']")
+#to remove extra data other than output we required
+Match_title = []
+for i in match:
+    Match_title.append(i.text)
+
+#extract the tag having Series
+series = web_driver.find_elements_by_xpath("//span[@class='u-unskewed-text fixture__tournament-label u-truncated']")
+#to remove extra data other than output we required
+Series = []
+for i in series:
+    Series.append(i.text)
+
+#extract the tag having Place
+place = web_driver.find_elements_by_xpath("//p[@class='fixture__additional-info']//span")
+#to remove extra data other than output we required
+Place = []
+for i in place:
+    Place.append(i.text)
+
+#extract the tag having Date
+date = web_driver.find_elements_by_xpath("//div[@class='fixture__full-date']")
+#to remove extra data other than output we required
+Date = []
+for i in date:
+    Date.append(i.text.replace('\n', ' ').replace(' 14:00 IST', ' 2022').replace(' 15:30 IST', ' 2022').replace(' 17:30 IST', ' 2022'))
+ 
+#extract the tag having Time
+time = web_driver.find_elements_by_xpath("//span[@class='fixture__time']")
+#to remove extra data other than output we required
+Time = []
+for i in time:
+    Time.append(i.text)
+# Make data frame of fictures from bcci.tv
+fictures = pd.DataFrame({})
+fictures['Match Title']= Match_title
+fictures['Series'] = Series
+fictures['Place'] = Place
+fictures['Date'] = Date
+fictures['Time'] = Time 
+fictures
+Match Title	Series	Place	Date	Time
+0	1st ODI	INDIA IN SOUTH AFRICA 2021/2022	Boland Park, Paarl	11 JANUARY 2022	14:00 IST
+1	2nd ODI	INDIA IN SOUTH AFRICA 2021/2022	Newlands, Cape Town	14 JANUARY 2022	14:00 IST
+2	3rd ODI	INDIA IN SOUTH AFRICA 2021/2022	Newlands, Cape Town	16 JANUARY 2022	14:00 IST
+3	1st ODI	ENGLAND V INDIA 2022	Edgbaston, Birmingham	09 JULY 2022	15:30 IST
+4	2nd ODI	ENGLAND V INDIA 2022	The Oval, London	12 JULY 2022	17:30 IST
+5	3rd ODI	ENGLAND V INDIA 2022	Lord's, London	14 JULY 2022	17:30 IST
+Que.3- Scrape the details of selenium exception from guru99.com. Url = https://www.guru99.com/You need to find following details:
+A) Name
+B) Description
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://www.guru99.com/'
+web_driver.get(url)
+#the url will open
+#serch button click
+selenium_button = web_driver.find_element_by_xpath("/html/body/div[1]/div/div/div/main/div/article/div/div[2]/div/div/div[4]/div/div/a/div[2]/h4")
+selenium_button.click()
+#serch button click
+tutorial_button = web_driver.find_element_by_xpath("/html/body/div[1]/div/div/div/main/div/article/div/div/table[5]/tbody/tr[34]/td[1]")
+tutorial_button.click()
+#extract the tag having Name
+name = web_driver.find_elements_by_xpath("//table[@class='table table-striped']//td")
+
+#to remove extra data other than output we required
+Name=[]
+for i in name:
+    Name.append(i.text)
+
+NAME = []
+for i in Name[0: :2]:
+    NAME.append(i)
+
+Description = []
+for i in Name[1: :2]:
+    Description.append(i)
+# Make data frame of selenium exception from guru99.com.
+
+selenium_exception = pd.DataFrame({})
+selenium_exception['NAME']= NAME
+selenium_exception['Description'] = Description
+selenium_exception.head()
+NAME	Description
+0	ElementNotVisibleException	This type of Selenium exception occurs when an...
+1	ElementNotSelectableException	This Selenium exception occurs when an element...
+2	NoSuchElementException	This Exception occurs if an element could not ...
+3	NoSuchFrameException	This Exception occurs if the frame target to b...
+4	NoAlertPresentException	This Exception occurs when you switch to no pr...
+Que.4- Scrape the details of State-wise GDP of India from statisticstime.com.Url = http://statisticstimes.com/ You have to find following details:
+A) Rank
+B) State
+C) GSDP at current price (19-20)
+D) GSDP at current price (18-19)
+E) Share(18-19)
+F) GDP($ billion)
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'http://statisticstimes.com/'
+web_driver.get(url)
+#the url will open
+#serch button click
+Economy_button = web_driver.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div[2]")
+Economy_button.click()
+
+#serch button click
+India_button = web_driver.find_element_by_xpath("/html/body/div[2]/div[1]/div[2]/div[2]/div/a[3]")
+India_button.click()
+
+#serch button click
+India_button = web_driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/ul/li[1]/a")
+India_button.click()
+#extract the tag having rank
+rank = web_driver.find_elements_by_xpath("//td[@class='data1']")
+#to remove extra data other than output we required
+Rank = []
+for i in rank:
+    Rank.append(i.text)
+
+#extract the tag having state
+state = web_driver.find_elements_by_xpath("//td[@class='name']")
+#to remove extra data other than output we required
+State = []
+for i in state:
+    State.append(i.text)
+
+#extract the tag having GSPD_Current
+current = web_driver.find_elements_by_xpath("//td[@class='data']")
+#to remove extra data other than output we required
+GSPD_Current = []
+for i in current:
+    GSPD_Current.append(i.text)
+    
+GDPS_19_20 = []
+for i in GSPD_Current[0: :5]:
+    GDPS_19_20.append(i)
+
+#extract the tag 
+current_18_19 = web_driver.find_elements_by_xpath("//td[@class='data sorting_1']")
+#to remove extra data other than output we required
+GSPD_18_19 = []
+for i in current_18_19:
+    GSPD_18_19.append(i.text)
+
+# extracg the data of share
+Share_19_20 = []
+for i in GSPD_Current[1: :5]:
+    Share_19_20.append(i)
+
+# extracg the data of GDP in Billions
+GDP = []
+for i in GSPD_Current[2: :5]:
+    GDP.append(i)
+# Make data frame of GDP from statisticstimes.com
+GDP_INDIA = pd.DataFrame({})
+GDP_INDIA['RANK']= Rank[0:33]
+GDP_INDIA['STATE']= State[0:33]
+GDP_INDIA['GSDP (18-19)'] = GDPS_19_20[0:33]
+GDP_INDIA['GSDP (18-19)'] = GSPD_18_19[0:33] 
+GDP_INDIA['SHARE (19-20)'] = Share_19_20[0:33]
+GDP_INDIA['GDP'] = GDP[0:33] 
+GDP_INDIA.head()
+RANK	STATE	GSDP (18-19)	SHARE (19-20)	GDP
+0	1	Maharashtra	2,632,792	13.94%	399.921
+1	2	Tamil Nadu	1,630,208	8.63%	247.629
+2	3	Uttar Pradesh	1,584,764	8.39%	240.726
+3	4	Gujarat	1,502,899	7.96%	228.290
+4	5	Karnataka	1,493,127	7.91%	226.806
+Que.5- Scrape the details of trending repositories on Github.com. Url = https://github.com/ You have to find the following details:
+A) Repository title
+B) Repository description
+C) Contributors count
+D) Language used
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://github.com/'
+web_driver.get(url)
+#the url will open
+#inspect for Skill,Designations,Companies field
+repo_search = web_driver.find_element_by_xpath("//input[@class='form-control input-sm header-search-input jump-to-field js-jump-to-field js-site-search-focus']")
+#this will write text on search bar
+repo_search.send_keys('trending repositories')
+#inspect for  field
+trending_search = web_driver.find_element_by_xpath("//div[@class='f4 text-normal']")
+#this will write text on search bar
+trending_search.click()
+#extract the tag having rank
+repo_title = web_driver.find_elements_by_xpath("//td[@class='data1']")
+#to remove extra data other than output we required
+Repository_title = []
+for i in repo_title:
+    Repository_title.append(i.text)
+Repository_title
+ 
+ 
+ 
+ 
+ 
+Que.5- Scrape the details of top 100 songs on billboard.com. Url = https://www.billboard.com/ You have to find the following details:
+A) Song name
+B) Artist name
+C) Last week rank
+D) Peak rank
+E) Weeks on board
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://www.billboard.com/'
+web_driver.get(url)
+#the url will open
+#serch button click
+charts_button = web_driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/header/div/ul/li[1]/a")
+charts_button.click()
+#serch button click
+top100_button = web_driver.find_element_by_xpath("/html/body/main/div[2]/div/div[1]/a/div[2]/div[2]/div[1]")
+top100_button.click()
+#extract the tag having song name
+name = web_driver.find_elements_by_xpath("//span[@class='chart-element__information__song text--truncate color--primary']")
+#to remove extra data other than output we required
+Song_name = []
+for i in name:
+    Song_name.append(i.text)
+
+#extract the tag having artist name
+Artist = web_driver.find_elements_by_xpath("//span[@class='chart-element__information__artist text--truncate color--secondary']")
+#to remove extra data other than output we required
+Artist_name = []
+for i in Artist:
+    Artist_name.append(i.text)
+
+#extract the tag having last week rank
+last_rank = web_driver.find_elements_by_xpath("//div[@class='chart-element__meta text--center color--secondary text--last']")
+#to remove extra data other than output we required
+Last_week_rank = []
+for i in last_rank:
+    Last_week_rank.append(i.text)
+
+#extract the tag having last peak rank
+peak_rank = web_driver.find_elements_by_xpath("//div[@class='chart-element__meta text--center color--secondary text--peak']")
+Peak_rank = []
+for i in peak_rank:
+    Peak_rank.append(i.text)
+
+#extract the tag having last week rank
+woc = web_driver.find_elements_by_xpath("//div[@class='chart-element__meta text--center color--secondary text--week']")
+Weeks_on_chart = []
+for i in woc:
+    Weeks_on_chart.append(i.text)
+# Make data frame of hot 100 from https://www.billboard.com/
+Hot_100 = pd.DataFrame({})
+Hot_100['Song_name']= Song_name
+Hot_100['Artist_name'] = Artist_name
+Hot_100['Last_week_rank'] = Last_week_rank 
+Hot_100['Peak_rank'] = Peak_rank
+Hot_100['Weeks_on_chart'] = Weeks_on_chart 
+Hot_100
+Song_name	Artist_name	Last_week_rank	Peak_rank	Weeks_on_chart
+0	Butter	BTS	7	1	15
+1	Stay	The Kid LAROI & Justin Bieber	1	1	8
+2	Bad Habits	Ed Sheeran	2	2	10
+3	Good 4 U	Olivia Rodrigo	3	1	16
+4	Kiss Me More	Doja Cat Featuring SZA	4	3	21
+...	...	...	...	...	...
+95	In Da Getto	J Balvin & Skrillex	-	96	1
+96	Brutal	Olivia Rodrigo	89	12	12
+97	AM	Nio Garcia X J Balvin X Bad Bunny	98	41	10
+98	Repeat It	Lil Tecca & Gunna	-	80	3
+99	Matt Hardy 999	Trippie Redd Featuring Juice WRLD	49	49	2
+100 rows × 5 columns
+
+Que.7-Scrape the details of Data science recruiters from naukri.com. Url = https://www.naukri.com/ You have to find the following details:
+A) Name
+B) Designation
+C) Company
+D) Skills they hire for
+E) Location
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://www.naukri.com'
+web_driver.get(url)
+#the url will open
+#serch button click
+recuiter_button = web_driver.find_element_by_xpath("//div[@class='mTxt']")
+recuiter_button.click()
+#inspect for Skill,Designations,Companies field
+ds_search = web_driver.find_element_by_xpath("//input[@class='sugInp']")
+#this will write text on search bar
+ds_search.send_keys('Data science')
+#serch button click
+search_button = web_driver.find_element_by_xpath("//button[@class='fl qsbSrch blueBtn']")
+search_button.click()
+In this question they are allowing us to open and scrap the data of recruiter list.
+Que.8- . Scrape the details of Highest selling novels. Url = https://www.theguardian.com/news/datablog/2012/aug/09/best-selling-books-all-time-fifty-shades-grey%02compare/ You have to find the following details:
+A) Book name
+B) Author name
+C) Volumes sold
+D) Publisher
+E) Genre
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://www.theguardian.com/news/datablog/2012/aug/09/best-selling-books-all-time-fifty-shades-grey-compare/'
+web_driver.get(url)
+#the url will open
+#extract the tag having rank
+rank = web_driver.find_elements_by_xpath("//td[@class='left']")
+#to remove extra data other than output we required
+Book_Name = []
+for i in rank:
+    Book_Name.append(i.text)
+BOOK_NAME = []
+for i in Book_Name[1: :5]:
+    BOOK_NAME.append(i)
+
+Auther_Name = []
+for i in Rank[2: :5]:
+    Auther_Name.append(i)
+
+Volume_sold = []
+for i in Rank[3: :5]:
+    Volume_sold.append(i)
+
+Publisher = []
+for i in Rank[4: :5]:
+    Publisher.append(i)
+
+#extract the tag having rank
+genre = web_driver.find_elements_by_xpath("//td[@class='last left']")
+#to remove extra data other than output we required
+Genre = []
+for i in genre:
+    Genre.append(i.text)
+# Make data frame of hot 100 from https://www.billboard.com/
+Novels = pd.DataFrame({})
+Novels['BOOK_NAME']= BOOK_NAME
+Novels['Auther_Name'] = Auther_Name
+Novels['Volume_sold'] = Volume_sold 
+Novels['Publisher'] = Publisher
+Novels['Genre'] = Genre 
+Novels
+BOOK_NAME	Auther_Name	Volume_sold	Publisher	Genre
+0	Da Vinci Code,The	Brown, Dan	5,094,805	Transworld	Crime, Thriller & Adventure
+1	Harry Potter and the Deathly Hallows	Rowling, J.K.	4,475,152	Bloomsbury	Children's Fiction
+2	Harry Potter and the Philosopher's Stone	Rowling, J.K.	4,200,654	Bloomsbury	Children's Fiction
+3	Harry Potter and the Order of the Phoenix	Rowling, J.K.	4,179,479	Bloomsbury	Children's Fiction
+4	Fifty Shades of Grey	James, E. L.	3,758,936	Random House	Romance & Sagas
+...	...	...	...	...	...
+95	Ghost,The	Harris, Robert	807,311	Random House	General & Literary Fiction
+96	Happy Days with the Naked Chef	Oliver, Jamie	794,201	Penguin	Food & Drink: General
+97	Hunger Games,The:Hunger Games Trilogy	Collins, Suzanne	792,187	Scholastic Ltd.	Young Adult Fiction
+98	Lost Boy,The:A Foster Child's Search for the L...	Pelzer, Dave	791,507	Orion	Biography: General
+99	Jamie's Ministry of Food:Anyone Can Learn to C...	Oliver, Jamie	791,095	Penguin	Food & Drink: General
+100 rows × 5 columns
+
+Que.9- . Scrape the details most watched tv series of all time from imdb.com. Url = https://www.imdb.com/list/ls095964455/ You have to find the following details:
+A) Name
+B) Year span
+C) Genre
+D) Run time
+E) Ratings
+F) Votes
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://www.imdb.com/list/ls095964455/'
+web_driver.get(url)
+#the url will open
+#extract the tag having Name
+name = web_driver.find_elements_by_xpath("//h3[@class='lister-item-header']//a")
+#to remove extra data other than output we required
+Name=[]
+for i in name:
+    Name.append(i.text)
+
+#extract the tag having year span
+year = web_driver.find_elements_by_xpath("//span[@class='lister-item-year text-muted unbold']")
+#to remove extra data other than output we required
+Year_Span=[]
+for i in year:
+    Year_Span.append(i.text)
+
+#extract the tag having Genre
+genre = web_driver.find_elements_by_xpath("//span[@class='genre']")
+#to remove extra data other than output we required
+Genre=[]
+for i in genre:
+    Genre.append(i.text)
+
+#extract the tag having run time
+run = web_driver.find_elements_by_xpath("//span[@class='runtime']")
+#to remove extra data other than output we required
+Run_Time=[]
+for i in run:
+    Run_Time.append(i.text)
+
+#extract the tag having ratings
+ratings = web_driver.find_elements_by_xpath("//div[@class='ipl-rating-star small']")
+#to remove extra data other than output we required
+Ratings=[]
+for i in ratings:
+    Ratings.append(i.text)
+
+#extract the tag having voting
+voting = web_driver.find_elements_by_xpath("//span[@name='nv']")
+#to remove extra data other than output we required
+Voting=[]
+for i in voting:
+    Voting.append(i.text)
+# Make data frame of tv series 100 from imdb.com
+TV_Series = pd.DataFrame({})
+TV_Series['NAME']= Name
+TV_Series['Year Span'] = Year_Span
+TV_Series['Genre'] = Genre 
+TV_Series['Run Time'] = Run_Time
+TV_Series['Ratings'] = Ratings 
+TV_Series['Voting'] = Voting 
+TV_Series
+NAME	Year Span	Genre	Run Time	Ratings	Voting
+0	Game of Thrones	(2011–2019)	Action, Adventure, Drama	57 min	9.2	1,870,194
+1	Stranger Things	(2016– )	Drama, Fantasy, Horror	51 min	8.7	905,363
+2	The Walking Dead	(2010–2022)	Drama, Horror, Thriller	44 min	8.2	895,995
+3	13 Reasons Why	(2017–2020)	Drama, Mystery, Thriller	60 min	7.6	269,510
+4	The 100	(2014–2020)	Drama, Mystery, Sci-Fi	43 min	7.6	229,834
+...	...	...	...	...	...	...
+95	Reign	(2013–2017)	Drama, Fantasy	42 min	7.5	45,548
+96	A Series of Unfortunate Events	(2017–2019)	Adventure, Comedy, Drama	50 min	7.8	56,432
+97	Criminal Minds	(2005–2020)	Crime, Drama, Mystery	42 min	8	174,863
+98	Scream: The TV Series	(2015–2019)	Comedy, Crime, Drama	45 min	7.1	36,567
+99	The Haunting of Hill House	(2018)	Drama, Horror, Mystery	572 min	8.6	198,642
+100 rows × 6 columns
+
+Que.10- Details of Datasets from UCI machine learning repositories. Url = https://archive.ics.uci.edu/ You have to find the following details:
+A) Dataset name
+B) Data type
+C) Task
+D) Attribute type
+E) No of instances
+F) No of attribute
+G) Year
+#connect to the web driver
+web_driver = webdriver.Edge("msedgedriver.exe")
+
+#Get url in web driver first
+url = 'https://archive.ics.uci.edu/'
+web_driver.get(url)
+#the url will open
+#serch button click
+dataset_button = web_driver.find_element_by_xpath("/html/body/table[1]/tbody/tr/td[2]/span[2]/a")
+dataset_button.click()
+#extract the tag having dataset Name
+name = web_driver.find_elements_by_xpath("//td[@valign='top']//a")
+#to remove extra data other than output we required
+Dataset_Name=[]
+for i in name:
+    Dataset_Name.append(i.text)
+Dataset_name = []
+for i in Dataset_Name[44: :2]:
+    Dataset_name.append(i)
+#extract the tag having dataset Name
+datat = web_driver.find_elements_by_xpath("//td[@valign='top']//p")
+#to remove extra data other than output we required
+Data_type=[]
+for i in datat:
+    Data_type.append(i.text)
+
+Data_Type=[]
+for i in Data_type[25: :7]:
+    Data_Type.append(i)
+#extract the tag having dataset Name
+task = web_driver.find_elements_by_xpath("//td[@valign='top']//p")
+#to remove extra data other than output we required
+Task=[]
+for i in task:
+    Task.append(i.text)
+
+TASK=[]
+for i in Task[26: :7]:
+    TASK.append(i)
+Attribute_Type=[]
+for i in Data_type[27: :7]:
+    Attribute_Type.append(i)
+Instances = []
+for i in Data_type[28: :7]:
+    Instances.append(i)
+Attribute=[]
+for i in Data_type[29: :7]:
+    Attribute.append(i)
+Year=[]
+for i in Data_type[30: :7]:
+    Year.append(i)
+# Make data frame of Datasets from UCI machine learning repositories from Url = https://archive.ics.uci.edu/
+ML_REPOSITORIES = pd.DataFrame({})
+ML_REPOSITORIES['Dataset_name']= Dataset_name
+ML_REPOSITORIES['Data_Type'] = Data_Type
+ML_REPOSITORIES['Task'] = TASK 
+ML_REPOSITORIES['Attribute_Type'] = Attribute_Type
+ML_REPOSITORIES['Instances'] = Instances 
+ML_REPOSITORIES['Attribute'] = Attribute 
+ML_REPOSITORIES['Year'] = Year
+ML_REPOSITORIES
+Dataset_name	Data_Type	Task	Attribute_Type	Instances	Attribute	Year
+0	Abalone	Multivariate	Classification	Categorical, Integer, Real	4177	8	1995
+1	Adult	Multivariate	Classification	Categorical, Integer	48842	14	1996
+2	Annealing	Multivariate	Classification	Categorical, Integer, Real	798	38	
+3	Anonymous Microsoft Web Data		Recommender-Systems	Categorical	37711	294	1998
+4	Arrhythmia	Multivariate	Classification	Categorical, Integer, Real	452	279	1998
+...	...	...	...	...	...	...	...
+583	in-vehicle coupon recommendation	Multivariate	Classification		12684	23	2020
+584	Gait Classification	Multivariate	Classification	Real	48	321	2020
+585	Wikipedia Math Essentials	Time-Series	Regression	Real	731	1068	2021
+586	Wikipedia Math Essentials	Time-Series	Regression	Real	731	1068	2021
+587	Synchronous Machine Data Set	Multivariate	Regression	Real	557	5	2021
